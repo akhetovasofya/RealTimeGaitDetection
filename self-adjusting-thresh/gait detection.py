@@ -80,6 +80,8 @@ with open("medium50m1excel.csv", "r") as file:
         #print(row)
         current_time = float(row[9])
 
+        #if current_time<10000 or current_time>19000:
+            #continue
 
         #CALIBRATION has a step cycle and it will record it from first sign change to 3rd sign change
         #if neg, wait until 0 and record until the next next 0
@@ -94,43 +96,48 @@ with open("medium50m1excel.csv", "r") as file:
         #recording swing and stance
         #if 0 or sign change, then start recording.
         if ((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point))): 
+            
             if (((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point)))&second_zero):
-                second_zero = False
-                first_zero = False
+                
                 elapsed_time = callibration_time[step%2][-1]-callibration_time[step%2][0]
-                if (len(callibration[step%2])>0):
-                    
+                #check that it is a third 0
+                if (not calibrated)or (calibrated & ((elapsed_time/(sum(total_time)/len(total_time)))>0.7)):
+                    second_zero = False
+                    first_zero = False
+                    if (len(callibration[step%2])>0):
+                        
+                        if (not calibrated)or((max(callibration[step%2])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%2])/(sum(TOpeak)/len(TOpeak))>0.2) ):
+                                #good trial so put it's values
+                            pos_peak.append(max(callibration[step%2]))
+                            TOpeak.append(min(callibration[step%2]))
+                            total_time.append(elapsed_time)
+                            standing_time.append(callibration_time[step%2][-1] - second_zero_time)
+                            index_mid_peak = callibration_time[step%2].index(second_zero_time)
+                            index_end_peak = int((len(callibration_time[step%2]) - index_mid_peak)/2)+index_mid_peak
+                            mid_peak_time_frame = callibration[step%2][index_mid_peak:index_end_peak]
+                            ICpeak.append(min(mid_peak_time_frame))
+                            print(elapsed_time)
+                            if step!=0 : #and elapsed_time>1250
+                                timing = [calib_time-callibration_time[step%2][0] for calib_time in callibration_time[step%2]]
+                                plt.plot(timing, callibration[step%2],  label="Step at {}".format(callibration_time[step%2][0]), linewidth=3.0)
+                            calibrated = True
+                            step+=1 #done with recording
 
-                    if (not calibrated)or((max(callibration[step%2])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%2])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.1)):
-                            #good trial so put it's values
-                        pos_peak.append(max(callibration[step%2]))
-                        TOpeak.append(min(callibration[step%2]))
-                        total_time.append(elapsed_time)
-                        standing_time.append(callibration_time[step%2][-1] - second_zero_time)
-                        index_mid_peak = callibration_time[step%2].index(second_zero_time)
-                        index_end_peak = int((len(callibration_time[step%2]) - index_mid_peak)/2)+index_mid_peak
-                        mid_peak_time_frame = callibration[step%2][index_mid_peak:index_end_peak]
-                        ICpeak.append(min(mid_peak_time_frame))
-                        print(elapsed_time)
-                        if step!=0 and elapsed_time>1250:
-                            timing = [calib_time-callibration_time[step%2][0] for calib_time in callibration_time[step%2]]
-                            plt.plot(timing, callibration[step%2],  label="Step at {}".format(callibration_time[step%2][0]), linewidth=3.0)
-                        calibrated = True
-                        step+=1 #done with recording
-
-                    #taking out old
-                    if len(total_time)>3:
-                        pos_peak.pop(0)
-                        TOpeak.pop(0)
-                        total_time.pop(0)
-                        standing_time.pop(0)
-                        ICpeak.pop(0)
-                callibration[step%2].clear()
-                callibration_time[step%2].clear()
-                #print("cleared")
+                        #taking out old
+                        if len(total_time)>3:
+                            pos_peak.pop(0)
+                            TOpeak.pop(0)
+                            total_time.pop(0)
+                            standing_time.pop(0)
+                            ICpeak.pop(0)
+                    callibration[step%2].clear()
+                    callibration_time[step%2].clear()
+                    #print("cleared")
                 continue
+
+            #filetring post heel strike noise
             #SECOND 0 THAT WE IGNORE
-            if (((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point)))&first_zero):
+            if (((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point)))&first_zero&(not second_zero)):
                 second_zero = True# got to 2nd but we keep recording
                 second_zero_time = current_time
             first_zero = True
@@ -154,12 +161,13 @@ with open("medium50m1excel.csv", "r") as file:
                 ICs.append(current_time)
                 ICg.append(current_point)
                 time_from_IC = current_time
-
+            
             #mini peak (having a time contraint for noisy data)
             elif ((current_point>sum(TOpeak)/len(TOpeak)*0.3)&heel_strike&(sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC))):
                 heel_strike = False
                 at_mini_peak = True
                 minipeak.append(current_time)
+                print(sum(standing_time)/len(standing_time))
                     
             #approaaching the low
             elif ((current_point<sum(TOpeak)/len(TOpeak)*0.8)&at_mini_peak):
@@ -281,11 +289,11 @@ difIC = []
 difTO = []
 print(len(ICtime))
 for i in range(0, len(ICtime)):
-    print("IC")
-    print(ICtime[i]-ICs[i])
+    #print("IC")
+    #print(ICtime[i]-ICs[i])
     difIC.append(ICtime[i]-ICs[i])
-    print("TO")
-    print(TOtime[i]-TOs[i])
+    #print("TO")
+    #print(TOtime[i]-TOs[i])
     difTO.append(TOtime[i]-TOs[i])
     theyis.append(i)
 plt.figure(figsize=(13, 5))
