@@ -3,66 +3,95 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import csv
+import global_variables
 # Set the directory path to search for .log files
-directory = "C:/Users/aheto/Documents/research/recording FSR big 10 people study/RealTimeGaitDetection\DataProccessing"
+directory = global_variables.directory
+directory_ground_truth = global_variables.directory_ground_truth
+directory_detected = global_variables.directory_detected
+directory_of_graphs = global_variables.directory_of_graphs
 for filename in os.listdir(directory):
     # Check if the file is a .log file
+    #if filename.split('_')[0] != "tyler":
+    #    continue
+
     if filename.endswith(".csv"):
-        name = substrings = filename.split('_')
+        name = filename.split('_')
         if name[1] == "med":
             name[1] = "Medium"
-        name = name[0].capitalize() + " " + name[1].capitalize()
+        #right foot?
+        if filename.split('_')[0] != "josh":
+            continue
+
+        right_foot = 1
+        if name[0] == "becca" or name[0] == "ryan" or name[0] == "patrick" or name[0] =="sofya" or  name[0] =="josh":
+            right_foot=-1
+        #####which trials we skipping#########
+        if name[0] == "patrick" or name[0] == "siyang" or name[0] == "tyler":
+            continue
+        pretty_name = name[0].capitalize() + " " + name[1].capitalize()
+        name = filename.split('.csv')[0]
 
         plt.figure(figsize=(20, 5))
         plt.rcParams.update({'font.size': 20})
-        imu = pd.read_csv(os.path.join(directory, filename))
 
-        plt.plot(imu[imu.columns[9]], imu[imu.columns[6]]*-1, label="Angular Velocity\n in Z (deg/s)", linewidth=1.0, zorder=-1)
+        imu = pd.read_csv(os.path.join(directory, filename))
+        
+
+        plt.plot(imu[imu.columns[9]], imu[imu.columns[6]]*right_foot, label="Angular Velocity\n in Z (deg/s)", linewidth=1.0, zorder=-1)
         plt.plot(imu[imu.columns[9]], imu[imu.columns[7]], label="FSR Toe", linewidth=1.0, zorder=-1)
         plt.plot(imu[imu.columns[9]], imu[imu.columns[8]], label="FSR Heel", linewidth=1.0, zorder=-1)
 
-        #getting IC and TO from data
+        # Just Raw Data
+        plt.xlabel("Time (ms)")
+        plt.title(pretty_name)
+        plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+        plt.show()
+        continue
+        ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
+        detected = pd.read_csv(os.path.join(directory_detected, filename.split('.csv')[0]+ "_detected.csv"))
         
-        ICtime = []
-        TOtime =[]
+        #detected
+        #########   DOTS FOR WHAT IT'S SUPPOSED TO BE  #####################
+        TOs = detected[detected.columns[0]]
+        TOg = detected[detected.columns[1]]
+        ICs = detected[detected.columns[2]]
+        ICg = detected[detected.columns[3]]
 
-        #detect fast changes in velocity for toes off
-        threshold_TO = -10
-        prev_time_index = 0
-        for i in range(1, len(imu[imu.columns[7]])):
-            diff = imu[imu.columns[7]][i] - imu[imu.columns[7]][i-1]
-            if diff < threshold_TO:
-                TOtime.append(imu[imu.columns[9]][i])
-                if (imu[imu.columns[9]][i]-imu[imu.columns[9]][prev_time_index]) <300:
-                    del TOtime[-2]
-                prev_time_index = i
+        plt.scatter(ICs, ICg, label="IC detected", color='red', linewidth=1.0, zorder=1)
+        plt.scatter(TOs, TOg, label="TO detected", color='purple', linewidth=1.0, zorder=1)
 
-        #detect fast changes in velocity for initial contact
-        threshold_IC = 10
-        prev_time_index = 0
-        for i in range(1, len(imu[imu.columns[8]])):
-            diff = imu[imu.columns[8]][i] - imu[imu.columns[8]][i-1]
-            if diff > threshold_IC:
-                if (imu[imu.columns[9]][i]-imu[imu.columns[9]][prev_time_index]) <300:
-                    continue
-                ICtime.append(imu[imu.columns[9]][i])
-                prev_time_index = i
-
-
+        #ground truth
+        TOtime = ground_truth[ground_truth.columns[0]]
+        ICtime = ground_truth[ground_truth.columns[1]]
         IC = [0]*len(ICtime)
         TO = [0]*len(TOtime)
-        plt.scatter(ICtime, IC, label="IC", color='red', linewidth=1.0, zorder=1)
-        plt.scatter(TOtime, TO, label="TO", color='purple', linewidth=1.0, zorder=1)
+
+        #deleting unused
+        for i in range(0, len(TOtime)):
+            if TOs[0]-TOtime[i] >200 or TOtime[i] - TOs[-1]>200:
+                del TOtime[i]
+        for i in range(0, len(TOtime)):
+            if ICs[0]-ICtime[i] >200 or ICtime[i] - ICs[-1]>200:
+                del ICtime[i]
+
+        #TO
+        plt.scatter(TOtime, TO, marker='o',s=10, label="TO from FSR", facecolors='none', edgecolors='purple', linewidth=1.0, zorder=1)
+        #IC
+        plt.scatter(ICtime, IC, marker='o',s=10, label="IC from FSR", facecolors='none', edgecolors='red',linewidth=1.0, zorder=1)
+
 
         # Add labels and legend
         plt.xlabel("Time (ms)")
-        plt.title(name)
+        plt.title(pretty_name)
         plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
 
-
+        
         # Show the plot
         plt.show()
+        #plt.savefig(os.path.join(directory_of_graphs, name + ".png"))
 
+
+        
 
 
 

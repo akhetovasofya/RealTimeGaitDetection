@@ -1,12 +1,15 @@
 import os
 import csv
 # Set the directory path to search for .log files
-directory = "C:/Users/aheto/Documents/research/recording FSR big 10 people study/DataProccessing"
+import global_variables
+directory = global_variables.directory
 
 # Iterate through all files in the directory
 for filename in os.listdir(directory):
     # Check if the file is a .log file
     if filename.endswith(".log"):
+        if filename.split('_')[0] != "josh":
+            continue
         # Open the .log file for reading
         with open(os.path.join(directory, filename), 'r') as log_file:
             # Read the contents of the file
@@ -19,11 +22,12 @@ for filename in os.listdir(directory):
         data = [row.split(' ') for row in rows]
 
         # Skip the first row of data
-        data = data[2:]
+        data = data[2:-1]
 
         # Calculate the difference between the value in the first row and each subsequent row
         first_value = float(data[0][0])
         for row in data:
+            #print(row)
             value = float(row[0])
             difference = value - first_value
             row.append(str(difference))
