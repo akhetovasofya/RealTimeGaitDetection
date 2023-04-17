@@ -19,14 +19,15 @@ for filename in os.listdir(directory):
         if name[1] == "med":
             name[1] = "Medium"
         #right foot?
-        if filename.split('_')[0] != "josh":
+
+        if filename.split('_')[0] != "tyler":
             continue
 
         right_foot = 1
         if name[0] == "becca" or name[0] == "ryan" or name[0] == "patrick" or name[0] =="sofya" or  name[0] =="josh":
             right_foot=-1
         #####which trials we skipping#########
-        if name[0] == "patrick" or name[0] == "siyang" or name[0] == "tyler":
+        if name[0] == "patrick" or name[0] == "siyang":
             continue
         pretty_name = name[0].capitalize() + " " + name[1].capitalize()
         name = filename.split('.csv')[0]
