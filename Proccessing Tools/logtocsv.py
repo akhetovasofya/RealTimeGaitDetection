@@ -8,7 +8,7 @@ directory = global_variables.directory
 for filename in os.listdir(directory):
     # Check if the file is a .log file
     if filename.endswith(".log"):
-        if filename.split('_')[0] != "siyang":
+        if filename.split('_')[0] != "patrick":
             continue
         # Open the .log file for reading
         with open(os.path.join(directory, filename), 'r') as log_file:
