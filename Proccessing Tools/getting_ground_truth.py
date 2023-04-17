@@ -9,11 +9,14 @@ directory = global_variables.directory
 directory_for_saving = global_variables.directory_ground_truth
 for filename in os.listdir(directory):
     # Check if the file is a .log file
-    #if filename.split('_')[0] != "tyler":
-    #    continue
+    if filename.split('_')[0] != "josh":
+    #if filename.split('_')[0]:
+        continue
+    
     if filename.endswith(".csv"):
         name = filename.split('.csv')[0]
         name_sections = filename.split('_')
+        print(filename)
         #skipping the done sections
         imu = pd.read_csv(os.path.join(directory, filename))
 
@@ -51,16 +54,20 @@ for filename in os.listdir(directory):
     
         # Open a new CSV file for writing
         with open((os.path.join(directory_for_saving, name + "_ground_truth.csv")), "w", newline="") as csvfile:
+            print(name + "_ground_truth.csv")
+            
             writer = csv.writer(csvfile)
             writer.writerow(["TO", "IC"])
             #if TO is longer than IC
             if len(TOtime)>=len(ICtime):
+                #print(TOtime)
                 for i in range(0,len(TOtime)):
                     if i >=len(ICtime):
                         writer.writerow([TOtime[i], ""])
                     else:
                         writer.writerow([TOtime[i], ICtime[i]])
             else:
+                #print(ICtime)
                 for i in range(0,len(ICtime)):
                     if i >=len(TOtime):
                         writer.writerow(["", ICtime[i]])

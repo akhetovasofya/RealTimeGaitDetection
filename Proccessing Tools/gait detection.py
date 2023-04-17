@@ -86,7 +86,7 @@ for filename in os.listdir(directory):
                 right_foot = 1
                 if name[0] == "becca" or name[0] == "ryan" or name[0] == "patrick" or name[0] =="sofya" or  name[0] =="josh":
                     right_foot=-1
-                current_point = float(row[6])*right_foot
+                current_point = float(row[6])*-1
                 #print(row)
                 current_time = float(row[9])
 
@@ -117,7 +117,7 @@ for filename in os.listdir(directory):
                                     #good trial so put it's values
                                 if (not calibrated) and (max(callibration[step%2]) <= 20 or min(callibration[step%2]) >=-20 or elapsed_time== 0):
                                     continue
-                                pos_peak.append(max(callibration[step%2])+1)
+                                pos_peak.append(max(callibration[step%2]))
                                 TOpeak.append(min(callibration[step%2]))
                                 total_time.append(elapsed_time)
                                 standing_time.append(callibration_time[step%2][-1] - second_zero_time)
@@ -189,6 +189,8 @@ for filename in os.listdir(directory):
 
         # Open a new CSV file for writing
         with open((os.path.join(directory_for_saving, name + "_detected.csv")), "w", newline="") as csvfile:
+            print(TOs)
+            print(ICs)
             writer = csv.writer(csvfile)
             writer.writerow(["TO time","TO value", "IC time", "IC value"])
             #if TO is longer than IC

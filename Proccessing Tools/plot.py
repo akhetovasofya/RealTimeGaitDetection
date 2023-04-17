@@ -15,20 +15,18 @@ for filename in os.listdir(directory):
     #    continue
 
     if filename.endswith(".csv"):
+        print(filename)
         name = filename.split('_')
         if name[1] == "med":
             name[1] = "Medium"
-        #right foot?
 
-        if filename.split('_')[0] != "tyler":
+        if filename.split('_')[0] != "siyang":
             continue
 
         right_foot = 1
         if name[0] == "becca" or name[0] == "ryan" or name[0] == "patrick" or name[0] =="sofya" or  name[0] =="josh":
             right_foot=-1
-        #####which trials we skipping#########
-        if name[0] == "patrick" or name[0] == "siyang":
-            continue
+
         pretty_name = name[0].capitalize() + " " + name[1].capitalize()
         name = filename.split('.csv')[0]
 
@@ -51,29 +49,46 @@ for filename in os.listdir(directory):
         ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
         detected = pd.read_csv(os.path.join(directory_detected, filename.split('.csv')[0]+ "_detected.csv"))
         
-        #detected
+        
         #########   DOTS FOR WHAT IT'S SUPPOSED TO BE  #####################
+
+        #detected
         TOs = detected[detected.columns[0]]
         TOg = detected[detected.columns[1]]
         ICs = detected[detected.columns[2]]
         ICg = detected[detected.columns[3]]
 
-        plt.scatter(ICs, ICg, label="IC detected", color='red', linewidth=1.0, zorder=1)
-        plt.scatter(TOs, TOg, label="TO detected", color='purple', linewidth=1.0, zorder=1)
-
         #ground truth
         TOtime = ground_truth[ground_truth.columns[0]]
         ICtime = ground_truth[ground_truth.columns[1]]
+        
+        
+        
+        #deleting unused
+        for i in range(0, len(TOs)):
+            if TOs[i] != TOs[i]:
+                del TOs[i] # deleting NaNs
+                del TOg[i] # deleting NaNs
+        for i in range(0, len(ICs)):
+            if ICs[i] != ICs[i]:
+                del ICs[i] # deleting NaNs
+                del ICg[i] # deleting NaNs
+
+        if len(TOs) == 0 or len(ICs) == 0:
+            print("ERRROR IN DETECTED")
+            continue
+        for i in range(0, len(TOtime)):
+            if (TOs[0]-TOtime[i]) >200 or (TOtime[i] - TOs[len(TOs)-1])>200:
+                del TOtime[i]
+        for i in range(0, len(TOtime)):
+            if (ICs[0]-ICtime[i])>200 or (ICtime[i] - ICs[len(ICs)-1])>200:
+                del ICtime[i]
+
         IC = [0]*len(ICtime)
         TO = [0]*len(TOtime)
 
-        #deleting unused
-        for i in range(0, len(TOtime)):
-            if TOs[0]-TOtime[i] >200 or TOtime[i] - TOs[-1]>200:
-                del TOtime[i]
-        for i in range(0, len(TOtime)):
-            if ICs[0]-ICtime[i] >200 or ICtime[i] - ICs[-1]>200:
-                del ICtime[i]
+        plt.scatter(ICs, ICg, label="IC detected", color='red', linewidth=1.0, zorder=1)
+        plt.scatter(TOs, TOg, label="TO detected", color='purple', linewidth=1.0, zorder=1)
 
         #TO
         plt.scatter(TOtime, TO, marker='o',s=10, label="TO from FSR", facecolors='none', edgecolors='purple', linewidth=1.0, zorder=1)

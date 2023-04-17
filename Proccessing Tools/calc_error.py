@@ -40,8 +40,6 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
 
             TOtime = ground_truth[ground_truth.columns[0]]
             ICtime = ground_truth[ground_truth.columns[1]]
-            IC = [0]*len(ICtime)
-            TO = [0]*len(TOtime)
         
             #detected
             #########   DOTS FOR WHAT IT'S SUPPOSED TO BE  #####################
@@ -53,16 +51,15 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             ##############################################################################################
             ###############getting error#################################################################
 
-            ###cutting of some values before and after
+            #print(TOs)
             for i in range(0, len(TOtime)):
-                if TOs[-1]==None:
-                    TOindex = -2
-                if TOs[0]-TOtime[i] >200 or TOtime[i] - TOs[-1]>200:
+                if (TOs[0]-TOtime[i]) >200 or (TOtime[i] - TOs[len(TOs)-1])>200:
                     del TOtime[i]
             for i in range(0, len(TOtime)):
-                if ICs[0]-ICtime[i] >200 or ICtime[i] - ICs[-1]>200:
+                if (ICs[0]-ICtime[i])>200 or (ICtime[i] - ICs[len(ICs)-1])>200:
                     del ICtime[i]
-
+            IC = [0]*len(ICtime)
+            TO = [0]*len(TOtime)
             ######################################
             difIC = []
             difTO = []
