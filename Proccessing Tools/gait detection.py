@@ -99,8 +99,8 @@ for filename in os.listdir(directory):
                 #if neg, wait until 0 and record until the next next 0
                 #if pos, wait until 0 then record until the next next 0
                 
-                callibration[step%2].append(current_point)
-                callibration_time[step%2].append(current_time)
+                callibration[step%3].append(current_point)
+                callibration_time[step%3].append(current_time)
                 
 
                 
@@ -111,23 +111,23 @@ for filename in os.listdir(directory):
                     if (((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point)))&second_zero):
                         second_zero = False
                         first_zero = False
-                        elapsed_time = callibration_time[step%2][-1]-callibration_time[step%2][0]
-                        if (len(callibration[step%2])>0):
+                        elapsed_time = callibration_time[step%3][-1]-callibration_time[step%3][0]
+                        if (len(callibration[step%3])>0):
                             
 
-                            if (not calibrated)or((max(callibration[step%2])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%2])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.1)):
+                            if (not calibrated)or((max(callibration[step%3])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%3])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.1)):
                                     #good trial so put it's values
-                                pos_peak.append(max(callibration[step%2]))
-                                TOpeak.append(min(callibration[step%2]))
+                                pos_peak.append(max(callibration[step%3]))
+                                TOpeak.append(min(callibration[step%3]))
                                 total_time.append(elapsed_time)
-                                standing_time.append(callibration_time[step%2][-1] - second_zero_time)
-                                index_mid_peak = callibration_time[step%2].index(second_zero_time)
-                                index_end_peak = int((len(callibration_time[step%2]) - index_mid_peak)/2)+index_mid_peak
-                                mid_peak_time_frame = callibration[step%2][index_mid_peak:index_end_peak]
+                                standing_time.append(callibration_time[step%3][-1] - second_zero_time)
+                                index_mid_peak = callibration_time[step%3].index(second_zero_time)
+                                index_end_peak = int((len(callibration_time[step%3]) - index_mid_peak)/2)+index_mid_peak
+                                mid_peak_time_frame = callibration[step%3][index_mid_peak:index_end_peak]
                                 ICpeak.append(min(mid_peak_time_frame))
                                 if step!=0 and elapsed_time>1250:
-                                    timing = [calib_time-callibration_time[step%2][0] for calib_time in callibration_time[step%2]]
-                                    plt.plot(timing, callibration[step%2],  label="Step at {}".format(callibration_time[step%2][0]), linewidth=3.0)
+                                    timing = [calib_time-callibration_time[step%3][0] for calib_time in callibration_time[step%3]]
+                                    plt.plot(timing, callibration[step%3],  label="Step at {}".format(callibration_time[step%3][0]), linewidth=3.0)
                                 calibrated = True
                                 step+=1 #done with recording
 
@@ -138,8 +138,8 @@ for filename in os.listdir(directory):
                                 total_time.pop(0)
                                 standing_time.pop(0)
                                 ICpeak.pop(0)
-                        callibration[step%2].clear()
-                        callibration_time[step%2].clear()
+                        callibration[step%3].clear()
+                        callibration_time[step%3].clear()
                         #print("cleared")
                         continue
                     if (((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point)))&first_zero):
@@ -160,7 +160,7 @@ for filename in os.listdir(directory):
                         peak.append(current_time)
                     #what happend is threshold is bad for currernt
                     #at heel strike
-                    elif ((current_point<sum(ICpeak)/len(ICpeak)*0.7)&at_max_peak):
+                    elif ((current_point<sum(ICpeak)/len(ICpeak)*0.8)&at_max_peak):
                         heel_strike = True
                         at_max_peak = False
                         ICs.append(current_time)
@@ -168,17 +168,17 @@ for filename in os.listdir(directory):
                         time_from_IC = current_time
 
                     #mini peak (having a time contraint for noisy data)
-                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.7)&heel_strike&(sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC))):
+                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.8)&heel_strike&(sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC))):
                         heel_strike = False
                         at_mini_peak = True
                         minipeak.append(current_time)
                             
                     #approaaching the low
-                    elif ((current_point<sum(TOpeak)/len(TOpeak)*0.7)&at_mini_peak):
+                    elif ((current_point<sum(TOpeak)/len(TOpeak)*0.8)&at_mini_peak):
                         at_mini_peak = False
                         approach_low_toe = True
                     #at toes off
-                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.7)&approach_low_toe):
+                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.8)&approach_low_toe):
                         toes_off = True
                         approach_low_toe = False
                         TOs.append(current_time)

@@ -20,8 +20,8 @@ for filename in os.listdir(directory):
         if name[1] == "med":
             name[1] = "Medium"
 
-        if filename.split('_')[0] != "becca":
-            continue
+        #if filename.split('_')[0] == "becca":
+        #    continue
 
         right_foot = 1
         if name[0] == "becca" or name[0] == "ryan" or name[0] == "patrick" or name[0] =="sofya" or  name[0] =="josh":
@@ -97,24 +97,20 @@ for filename in os.listdir(directory):
         ##################################################
         ########removing before and after detected
         if ICs[0]>TOs[0]:
-            first_detected = TOs[0]-100
+            first_detected = TOs[0]-200
         else:
-            first_detected = ICs[0]-100
+            first_detected = ICs[0]-200
         
         if ICs[-1]>TOs[-1]:
-            last_detected = ICs[-1]+100
+            last_detected = ICs[-1]+200
         else:
-            last_detected = TOs[-1]+100
+            last_detected = TOs[-1]+200
 
 
         for ic_index in ICtime_old:
-            print("ic index:")
-            print(ic_index)
             if ic_index>first_detected and ic_index<last_detected:
                 ICtime.append(ic_index)
         for to_index in TOtime_old:
-            print("to index:")
-            print(to_index)
             if to_index>first_detected and to_index<last_detected:
                 TOtime.append(to_index)
         
