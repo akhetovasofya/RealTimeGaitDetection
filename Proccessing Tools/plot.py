@@ -20,7 +20,7 @@ for filename in os.listdir(directory):
         if name[1] == "med":
             name[1] = "Medium"
 
-        if filename.split('_')[0] != "tyler":
+        if filename.split('_')[0] != "nick":
             continue
 
         right_foot = 1
