@@ -9,7 +9,7 @@ directory = global_variables.directory
 directory_for_saving = global_variables.directory_ground_truth
 for filename in os.listdir(directory):
     # Check if the file is a .log file
-    if filename.split('_')[0] != "josh":
+    if filename.split('_')[0] != "madeleine":
     #if filename.split('_')[0]:
         continue
     

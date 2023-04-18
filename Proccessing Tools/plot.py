@@ -20,13 +20,14 @@ for filename in os.listdir(directory):
         if name[1] == "med":
             name[1] = "Medium"
 
-        if filename.split('_')[0] != "josh":
+        if filename.split('_')[0] != "madeleine":
             continue
 
         right_foot = 1
         if name[0] == "becca" or name[0] == "ryan" or name[0] == "patrick" or name[0] =="sofya" or  name[0] =="josh":
             right_foot=-1
-
+        if name[0] == "madeleine" and name[-2]=="right":
+            right_foot=-1
         pretty_name = name[0].capitalize() + " " + name[1].capitalize()
         name = filename.split('.csv')[0]
 
@@ -56,7 +57,7 @@ for filename in os.listdir(directory):
 
         # Just Raw Data
         plt.xlabel("Time (ms)")
-        plt.title(pretty_name)
+        plt.title(filename)
         plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
         plt.show()
         continue
