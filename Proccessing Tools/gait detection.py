@@ -21,8 +21,11 @@ for filename in os.listdir(directory):
     
     if filename.endswith(".csv"):
         name = filename.split('.csv')[0]
-        if name.split("_")[-1]=="truth":
+        name_split = name.split("_")
+        if name_split[-1]=="truth":
             continue
+        #if name_split[0]!="becca":
+            #continue
         with open(os.path.join(directory, filename), "r") as file:
             # Create a CSV reader
             imu = csv.reader(file)
@@ -30,8 +33,12 @@ for filename in os.listdir(directory):
             # Skip the header row
             next(imu)
             next(imu)
-            
-            
+
+            right_foot = 1
+            if name_split[0] == "becca" or name_split[0] == "ryan" or name_split[0] == "patrick" or name_split[0] =="sofya" or  name_split[0] =="josh":
+                right_foot=-1
+            if name_split[0] == "madeleine" and name_split[-2]=="right":
+                right_foot=-1
             # I need to divide it into 2 sections, calibrations and then analysis
             callibration_step1 = []
             callibration_step2 = []
@@ -77,16 +84,13 @@ for filename in os.listdir(directory):
             for index, row in enumerate(imu):
                 # Access individual values by index
                 #print(row[9], row[6])
-                #if index<250:
-                #    continue
+                if index<250:
+                    continue
+
                 if len(row)<9:
                     continue
 
-                #print(row)
-                right_foot = 1
-                if name[0] == "becca" or name[0] == "ryan" or name[0] == "patrick" or name[0] =="sofya" or  name[0] =="josh":
-                    right_foot=-1
-                current_point = float(row[6])*-1
+                current_point = float(row[6])*right_foot
                 #print(row)
                 current_time = float(row[9])
 
@@ -109,14 +113,10 @@ for filename in os.listdir(directory):
                         first_zero = False
                         elapsed_time = callibration_time[step%2][-1]-callibration_time[step%2][0]
                         if (len(callibration[step%2])>0):
-                            #(elapsed_time/(sum(total_time)/len(total_time))>0.1)
-                            #print(calibrated)
-                            #print(pos_peak)
-                            #print(TOpeak)
-                            if (not calibrated)or((max(callibration[step%2])/((sum(pos_peak)/len(pos_peak)))>0.2) & (min(callibration[step%2])/(sum(TOpeak)/len(TOpeak))>0.2) ):
+                            
+
+                            if (not calibrated)or((max(callibration[step%2])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%2])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.1)):
                                     #good trial so put it's values
-                                if (not calibrated) and (max(callibration[step%2]) <= 20 or min(callibration[step%2]) >=-20 or elapsed_time== 0):
-                                    continue
                                 pos_peak.append(max(callibration[step%2]))
                                 TOpeak.append(min(callibration[step%2]))
                                 total_time.append(elapsed_time)
@@ -160,7 +160,7 @@ for filename in os.listdir(directory):
                         peak.append(current_time)
                     #what happend is threshold is bad for currernt
                     #at heel strike
-                    elif ((current_point<sum(ICpeak)/len(ICpeak)*0.8)&at_max_peak):
+                    elif ((current_point<sum(ICpeak)/len(ICpeak)*0.7)&at_max_peak):
                         heel_strike = True
                         at_max_peak = False
                         ICs.append(current_time)
@@ -168,17 +168,17 @@ for filename in os.listdir(directory):
                         time_from_IC = current_time
 
                     #mini peak (having a time contraint for noisy data)
-                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.3)&heel_strike&(sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC))):
+                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.7)&heel_strike&(sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC))):
                         heel_strike = False
                         at_mini_peak = True
                         minipeak.append(current_time)
                             
                     #approaaching the low
-                    elif ((current_point<sum(TOpeak)/len(TOpeak)*0.8)&at_mini_peak):
+                    elif ((current_point<sum(TOpeak)/len(TOpeak)*0.7)&at_mini_peak):
                         at_mini_peak = False
                         approach_low_toe = True
                     #at toes off
-                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.8)&approach_low_toe):
+                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.7)&approach_low_toe):
                         toes_off = True
                         approach_low_toe = False
                         TOs.append(current_time)
@@ -187,10 +187,11 @@ for filename in os.listdir(directory):
                 prev_time = current_time
 
 
+
+
+
         # Open a new CSV file for writing
         with open((os.path.join(directory_for_saving, name + "_detected.csv")), "w", newline="") as csvfile:
-            print(TOs)
-            print(ICs)
             writer = csv.writer(csvfile)
             writer.writerow(["TO time","TO value", "IC time", "IC value"])
             #if TO is longer than IC
