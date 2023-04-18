@@ -20,7 +20,7 @@ for filename in os.listdir(directory):
         if name[1] == "med":
             name[1] = "Medium"
 
-        if filename.split('_')[0] != "patrick":
+        if filename.split('_')[0] != "josh":
             continue
 
         right_foot = 1
@@ -40,27 +40,37 @@ for filename in os.listdir(directory):
         plt.plot(imu[imu.columns[9]], imu[imu.columns[7]], label="FSR Toe", linewidth=1.0, zorder=-1)
         plt.plot(imu[imu.columns[9]], imu[imu.columns[8]], label="FSR Heel", linewidth=1.0, zorder=-1)
 
+        
+        ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
+        #ground truth
+        TOtime = ground_truth[ground_truth.columns[0]]
+        ICtime = ground_truth[ground_truth.columns[1]]
+
+        IC = [0]*len(ICtime)
+        TO = [0]*len(TOtime)
+        #TO
+        plt.scatter(TOtime, TO, marker='o',s=10, label="TO from FSR", facecolors='none', edgecolors='purple', linewidth=1.0, zorder=1)
+        #IC
+        plt.scatter(ICtime, IC, marker='o',s=10, label="IC from FSR", facecolors='none', edgecolors='red',linewidth=1.0, zorder=1)
+        
+
         # Just Raw Data
         plt.xlabel("Time (ms)")
         plt.title(pretty_name)
         plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
         plt.show()
         continue
-        ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
-        detected = pd.read_csv(os.path.join(directory_detected, filename.split('.csv')[0]+ "_detected.csv"))
-        
         
         #########   DOTS FOR WHAT IT'S SUPPOSED TO BE  #####################
 
         #detected
+        detected = pd.read_csv(os.path.join(directory_detected, filename.split('.csv')[0]+ "_detected.csv"))
         TOs = detected[detected.columns[0]]
         TOg = detected[detected.columns[1]]
         ICs = detected[detected.columns[2]]
         ICg = detected[detected.columns[3]]
 
-        #ground truth
-        TOtime = ground_truth[ground_truth.columns[0]]
-        ICtime = ground_truth[ground_truth.columns[1]]
+        
         
         
         
@@ -90,10 +100,7 @@ for filename in os.listdir(directory):
         plt.scatter(ICs, ICg, label="IC detected", color='red', linewidth=1.0, zorder=1)
         plt.scatter(TOs, TOg, label="TO detected", color='purple', linewidth=1.0, zorder=1)
 
-        #TO
-        plt.scatter(TOtime, TO, marker='o',s=10, label="TO from FSR", facecolors='none', edgecolors='purple', linewidth=1.0, zorder=1)
-        #IC
-        plt.scatter(ICtime, IC, marker='o',s=10, label="IC from FSR", facecolors='none', edgecolors='red',linewidth=1.0, zorder=1)
+        
 
 
         # Add labels and legend
