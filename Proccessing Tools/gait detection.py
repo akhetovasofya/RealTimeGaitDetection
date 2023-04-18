@@ -71,6 +71,7 @@ for filename in os.listdir(directory):
             second_zero = False
             step = 0
             time_from_IC=0
+            IC_min_point = 0
 
             calibrated = False
             at_max_peak = False
@@ -160,15 +161,16 @@ for filename in os.listdir(directory):
                         peak.append(current_time)
                     #what happend is threshold is bad for currernt
                     #at heel strike
-                    elif ((current_point<sum(ICpeak)/len(ICpeak)*0.8)&at_max_peak):
+                    elif (current_point<(sum(ICpeak)/len(ICpeak)*0.8) or ((current_point - prev_point>5) and current_point<0))&at_max_peak:
                         heel_strike = True
                         at_max_peak = False
                         ICs.append(current_time)
                         ICg.append(current_point)
                         time_from_IC = current_time
+                              
 
                     #mini peak (having a time contraint for noisy data)
-                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.8)&heel_strike&(sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC))):
+                    elif ((current_point>(sum(TOpeak)/len(TOpeak)*0.8))&heel_strike&(sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC))):
                         heel_strike = False
                         at_mini_peak = True
                         minipeak.append(current_time)
@@ -178,7 +180,7 @@ for filename in os.listdir(directory):
                         at_mini_peak = False
                         approach_low_toe = True
                     #at toes off #saving if toe never went off so have a positive
-                    elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.8)) |(current_point>0))&approach_low_toe):
+                    elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.81)) or (current_point>0))&approach_low_toe):
                         toes_off = True
                         approach_low_toe = False
                         TOs.append(current_time)
