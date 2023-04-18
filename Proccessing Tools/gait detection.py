@@ -174,15 +174,16 @@ for filename in os.listdir(directory):
                         minipeak.append(current_time)
                             
                     #approaaching the low
-                    elif ((current_point<sum(TOpeak)/len(TOpeak)*0.8)&at_mini_peak):
+                    elif ((current_point<(sum(TOpeak)/len(TOpeak)*0.8))&at_mini_peak):
                         at_mini_peak = False
                         approach_low_toe = True
-                    #at toes off
-                    elif ((current_point>sum(TOpeak)/len(TOpeak)*0.8)&approach_low_toe):
+                    #at toes off #saving if toe never went off so have a positive
+                    elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.8)) |(current_point>0))&approach_low_toe):
                         toes_off = True
                         approach_low_toe = False
                         TOs.append(current_time)
                         TOg.append(current_point)
+                    #saving if toe never went off
                 prev_point = current_point
                 prev_time = current_time
 
