@@ -181,7 +181,7 @@ for filename in os.listdir(directory):
                             
                     #approaaching the low
                     elif ((current_point<(sum(TOpeak)/len(TOpeak)*0.5))&at_mini_peak):
-                        if (current_time-minipeak[-1])>sum(standing_time)/len(standing_time)*0.1:
+                        if (current_time-time_from_IC)>sum(standing_time)/len(standing_time)*0.7:
                             at_mini_peak = False
                             approach_low_toe = True
                     #at toes off #saving if toe never went off so have a positive
