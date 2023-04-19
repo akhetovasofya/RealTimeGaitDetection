@@ -30,6 +30,8 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
         if filename.endswith(".csv"):
             name = filename.split('_')
             print(filename)
+            if name[0] == "madeleine":
+                continue
 
             imu = pd.read_csv(os.path.join(directory, filename))
             ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))

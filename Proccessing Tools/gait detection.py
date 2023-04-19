@@ -36,8 +36,8 @@ for filename in os.listdir(directory):
             # Skip the header row
             next(imu)
             next(imu)
-            #if name_split[0] != "daniel":
-                #continue
+            if name_split[0] == "madeleine":
+                continue
             right_foot = 1
             if name_split[0] == "becca" or name_split[0] == "ryan" or name_split[0] == "patrick" or name_split[0] =="sofya" or  name_split[0] =="josh":
                 right_foot=-1
@@ -214,6 +214,10 @@ for filename in os.listdir(directory):
             writer = csv.writer(csvfile)
             writer.writerow(["TO time","TO value", "IC time", "IC value"])
             #if TO is longer than IC
+            TOs = TOs[0:-1]
+            ICs = ICs[0:-1]
+            TOg = TOg[0:-1]
+            ICg = ICg[0:-1]
             if len(TOs)>=len(ICs):
                 for i in range(0,len(TOs)):
                     if i >=len(ICs):

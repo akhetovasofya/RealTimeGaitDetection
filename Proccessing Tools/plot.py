@@ -22,7 +22,7 @@ for filename in os.listdir(directory):
         if name[1] == "med":
             name[1] = "Medium"
 
-        if filename.split('_')[0] == "becca":
+        if name[0] == "madeleine":
             continue
 
         right_foot = 1
