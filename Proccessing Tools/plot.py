@@ -15,13 +15,15 @@ for filename in os.listdir(directory):
     #    continue
 
     if filename.endswith(".csv"):
+
         print(filename)
+        
         name = filename.split('_')
         if name[1] == "med":
             name[1] = "Medium"
 
-        #if filename.split('_')[0] == "becca":
-            #continue
+        if filename.split('_')[0] == "becca":
+            continue
 
         right_foot = 1
         if name[0] == "becca" or name[0] == "ryan" or name[0] == "patrick" or name[0] =="sofya" or  name[0] =="josh":

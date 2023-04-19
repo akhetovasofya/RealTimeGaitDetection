@@ -30,12 +30,14 @@ for filename in os.listdir(directory):
         with open(os.path.join(directory, filename), "r") as file:
             # Create a CSV reader
             imu = csv.reader(file)
+            print()
+            print()
             print(filename)
             # Skip the header row
             next(imu)
             next(imu)
-            if name_split[0] != "becca":
-                continue
+            #if name_split[0] != "daniel":
+                #continue
             right_foot = 1
             if name_split[0] == "becca" or name_split[0] == "ryan" or name_split[0] == "patrick" or name_split[0] =="sofya" or  name_split[0] =="josh":
                 right_foot=-1
@@ -88,7 +90,7 @@ for filename in os.listdir(directory):
                 # Access individual values by index
                 #print(row[9], row[6])
 
-                if index <300:
+                if index <200:
                     continue
                 if len(row)<9:
                     continue
@@ -130,9 +132,9 @@ for filename in os.listdir(directory):
                                 index_end_peak = int((len(callibration_time[step%3]) - index_mid_peak)/2)+index_mid_peak
                                 mid_peak_time_frame = callibration[step%3][index_mid_peak:index_end_peak]
                                 ICpeak.append(min(mid_peak_time_frame))
-                                if step!=0 and elapsed_time>1250:
-                                    timing = [calib_time-callibration_time[step%3][0] for calib_time in callibration_time[step%3]]
-                                    plt.plot(timing, callibration[step%3],  label="Step at {}".format(callibration_time[step%3][0]), linewidth=3.0)
+                                #if step!=0 and elapsed_time>1250:
+                                    #timing = [calib_time-callibration_time[step%3][0] for calib_time in callibration_time[step%3]]
+                                    #plt.plot(timing, callibration[step%3],  label="Step at {}".format(callibration_time[step%3][0]), linewidth=3.0)
                                 calibrated = True
                                 step+=1 #done with recording
 
@@ -164,14 +166,18 @@ for filename in os.listdir(directory):
                         heel_strike = False
                         at_mini_peak = False
                         approach_low_toe = False
+                        print("max peak: ", current_time)
                         peak.append(current_time)
                     #what happend is threshold is bad for currernt
                     #at heel strike
-                    elif (current_point<(sum(ICpeak)/len(ICpeak)*0.8) or ((current_point - prev_point>5) and (current_point-second_prev_point)>0 and current_point<0))&at_max_peak:
+                    elif (current_point<(sum(TOpeak)/len(TOpeak)*0.8) or (((current_point - prev_point)>5 and (current_point-second_prev_point)>0) and current_point<0))&at_max_peak:
                         heel_strike = True
                         at_max_peak = False
                         ICs.append(current_time)
                         ICg.append(current_point)
+                        print("IC: ", current_time," ", current_point)
+                        print("which statement: ", (sum(TOpeak)/len(TOpeak)*0.8))
+                        print(TOpeak)
                         time_from_IC = current_time
                               
 
@@ -191,6 +197,7 @@ for filename in os.listdir(directory):
                     elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.9)) and ((current_point - prev_point)>5) and (current_point-second_prev_point)>0)&approach_low_toe and ((callibration_time[step%3][-1]-callibration_time[step%3][0])>elapsed_time*0.4)):
                         toes_off = True
                         approach_low_toe = False
+                        print("TO: ", current_time)
                         TOs.append(current_time)
                         TOg.append(current_point)
                     #saving if toe never went off
