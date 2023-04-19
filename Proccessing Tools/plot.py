@@ -22,7 +22,10 @@ for filename in os.listdir(directory):
         if name[1] == "med":
             name[1] = "Medium"
 
-        if name[0] == "madeleine":
+        if name[1] == "very":
+            name[1] = "Varying Speeds"
+
+        if name[0] != "daniel":
             continue
 
         right_foot = 1
@@ -30,7 +33,7 @@ for filename in os.listdir(directory):
             right_foot=-1
         if name[0] == "madeleine" and name[-2]=="right":
             right_foot=-1
-        pretty_name = name[0].capitalize() + " " + name[1].capitalize()
+        pretty_name = "50m Walk" + " " + name[1].capitalize()
         name = filename.split('.csv')[0]
 
         plt.figure(figsize=(20, 5))

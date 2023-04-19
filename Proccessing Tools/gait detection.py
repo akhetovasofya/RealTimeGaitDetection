@@ -122,8 +122,6 @@ for filename in os.listdir(directory):
 
                             if (not calibrated)or((max(callibration[step%3])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%3])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.1)):
                                     #good trial so put it's values
-                                print("start: ",callibration_time[step%3][0] )
-                                print("end: ",callibration_time[step%3][-1] )
                                 pos_peak.append(max(callibration[step%3]))
                                 TOpeak.append(min(callibration[step%3]))
                                 total_time.append(elapsed_time)
@@ -145,8 +143,6 @@ for filename in os.listdir(directory):
                                 total_time.pop(0)
                                 standing_time.pop(0)
                                 ICpeak.pop(0)
-                            print(pos_peak)
-                            print(TOpeak)
                         callibration[step%3].clear()
                         callibration_time[step%3].clear()
                         #print("cleared")
@@ -166,7 +162,6 @@ for filename in os.listdir(directory):
                         heel_strike = False
                         at_mini_peak = False
                         approach_low_toe = False
-                        print("max peak: ", current_time)
                         peak.append(current_time)
                     #what happend is threshold is bad for currernt
                     #at heel strike
@@ -175,9 +170,6 @@ for filename in os.listdir(directory):
                         at_max_peak = False
                         ICs.append(current_time)
                         ICg.append(current_point)
-                        print("IC: ", current_time," ", current_point)
-                        print("which statement: ", (sum(TOpeak)/len(TOpeak)*0.8))
-                        print(TOpeak)
                         time_from_IC = current_time
                               
 
@@ -185,19 +177,17 @@ for filename in os.listdir(directory):
                     elif ((current_point>(sum(TOpeak)/len(TOpeak)*0.5))&heel_strike&(sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC))):
                         heel_strike = False
                         at_mini_peak = True
-                        print("mini peak: ", current_time)
                         minipeak.append(current_time)
                             
                     #approaaching the low
                     elif ((current_point<(sum(TOpeak)/len(TOpeak)*0.5))&at_mini_peak):
-                        at_mini_peak = False
-                        approach_low_toe = True
-                        print("approach low: ", current_time)
+                        if (current_time-minipeak[-1])>sum(standing_time)/len(standing_time)*0.1:
+                            at_mini_peak = False
+                            approach_low_toe = True
                     #at toes off #saving if toe never went off so have a positive
                     elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.9)) and ((current_point - prev_point)>5) and (current_point-second_prev_point)>0)&approach_low_toe and ((callibration_time[step%3][-1]-callibration_time[step%3][0])>elapsed_time*0.4)):
                         toes_off = True
                         approach_low_toe = False
-                        print("TO: ", current_time)
                         TOs.append(current_time)
                         TOg.append(current_point)
                     #saving if toe never went off

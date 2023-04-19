@@ -10,7 +10,7 @@ directory_ground_truth = global_variables.directory_ground_truth
 directory_detected = global_variables.directory_detected
 directory_final_calculations = global_variables.directory_final_calculations
 
-with open((os.path.join(directory_final_calculations, "Final_Calculations.csv")), "w", newline="") as csvfile:
+with open((os.path.join(directory_final_calculations, "Final_Calculations_Hard.csv")), "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["Which file:", "TO average delay", "IC average delay"])
     overallTOslow = []
@@ -34,7 +34,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
                 continue
             imu = pd.read_csv(os.path.join(directory, filename))
             ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
-            detected = pd.read_csv(os.path.join(directory_detected, filename.split('.csv')[0]+ "_detected.csv"))
+            detected = pd.read_csv(os.path.join(directory_detected, filename.split('.csv')[0]+ "_hard_thresh_detected.csv"))
             #print(detected)
             TOtime_old = ground_truth[ground_truth.columns[0]]
             TOtime_old = TOtime_old.values.tolist()
