@@ -138,6 +138,14 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
     THE_IC_delay = (sum(overallICslow)/len(overallICslow)+sum(overallICmed)/len(overallICmed)+sum(overallICfast)/len(overallICfast)+sum(overallICvary)/len(overallICvary))/4
     writer.writerow([THE_TO_delay, THE_IC_delay])
     writer.writerow([])
+    plt.figure(figsize=(20, 5))
+    plt.rcParams.update({'font.size': 20})
+    plt.scatter(overallTOslow, 0,  color='green', linewidth=1.0, zorder=1)
+    plt.scatter(overallTOmed, 1,  color='orange', linewidth=1.0, zorder=1)
+    plt.scatter(overallTOfast, 2,  color='red', linewidth=1.0, zorder=1)
+    plt.scatter(overallTOvary, 4,  color='blue', linewidth=1.0, zorder=1)
+    plt.title("Error TO")
+    plt.show()
 
 
 

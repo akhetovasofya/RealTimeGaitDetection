@@ -185,7 +185,7 @@ for filename in os.listdir(directory):
                             at_mini_peak = False
                             approach_low_toe = True
                     #at toes off #saving if toe never went off so have a positive
-                    elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.9)) and ((current_point - prev_point)>5) and (current_point-second_prev_point)>0)&approach_low_toe and ((callibration_time[step%3][-1]-callibration_time[step%3][0])>elapsed_time*0.4)):
+                    elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.9)) and ((current_point - prev_point)>5) and (current_point-second_prev_point)>0)&approach_low_toe):
                         toes_off = True
                         approach_low_toe = False
                         TOs.append(current_time)
