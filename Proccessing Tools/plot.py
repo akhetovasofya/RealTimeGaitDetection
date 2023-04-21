@@ -22,18 +22,18 @@ for filename in os.listdir(directory):
         if name[1] == "med":
             name[1] = "Medium"
 
-        if name[1] == "very":
+        if name[1] == "vary":
             name[1] = "Varying Speeds"
 
-        if name[0] != "daniel":
+        if name[0] != "GRT05":
             continue
 
         right_foot = 1
-        if name[0] == "becca" or name[0] == "ryan" or name[0] == "patrick" or name[0] =="sofya" or  name[0] =="josh":
+        if name[0] == "GRT07" or name[0] == "GRT09" or name[0] == "GRT05" or name[0] =="sofya" or  name[0] =="GRT02":
             right_foot=-1
-        if name[0] == "madeleine" and name[-2]=="right":
+        if name[0] == "GRT03" and name[-2]=="right":
             right_foot=-1
-        pretty_name = "50m Walk" + " " + name[1].capitalize()
+        pretty_name = "50m Walk" + " " + name[1]
         name = filename.split('.csv')[0]
 
         plt.figure(figsize=(20, 5))

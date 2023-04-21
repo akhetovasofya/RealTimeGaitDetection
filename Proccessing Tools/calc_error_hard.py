@@ -30,7 +30,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations_Hard.c
         if filename.endswith(".csv"):
             name = filename.split('_')
             print(filename)
-            if name[0] == "madeleine":
+            if name[0] == "GRT03":
                 continue
             imu = pd.read_csv(os.path.join(directory, filename))
             ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
@@ -62,6 +62,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations_Hard.c
             ICg = []
             TOs = []
             TOg = []
+            
             for i in range(0, len(TOs_old)):
                 if TOs_old[i] == TOs_old[i]:
                     TOs.append(TOs_old[i]) # deleting NaNs

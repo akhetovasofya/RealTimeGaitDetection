@@ -36,12 +36,12 @@ for filename in os.listdir(directory):
             # Skip the header row
             next(imu)
             next(imu)
-            if name_split[0] == "madeleine":
+            if name_split[0] == "GRT03":
                 continue
             right_foot = 1
-            if name_split[0] == "becca" or name_split[0] == "ryan" or name_split[0] == "patrick" or name_split[0] =="sofya" or  name_split[0] =="josh":
+            if name_split[0] == "GRT07" or name_split[0] == "GRT09" or name_split[0] == "GRT05" or name_split[0] =="sofya" or  name_split[0] =="GRT02":
                 right_foot=-1
-            if name_split[0] == "madeleine" and name_split[-2]=="right":
+            if name_split[0] == "GRT03" and name_split[-2]=="right":
                 right_foot=-1
             # I need to divide it into 2 sections, calibrations and then analysis
             callibration_step1 = []
@@ -181,11 +181,11 @@ for filename in os.listdir(directory):
                             
                     #approaaching the low
                     elif ((current_point<(sum(TOpeak)/len(TOpeak)*0.5))&at_mini_peak):
-                        if (current_time-time_from_IC)>sum(standing_time)/len(standing_time)*0.7:
+                        if (current_time-time_from_IC)>sum(standing_time)/len(standing_time)*0.6:
                             at_mini_peak = False
                             approach_low_toe = True
                     #at toes off #saving if toe never went off so have a positive
-                    elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.9)) and ((current_point - prev_point)>5) and (current_point-second_prev_point)>0)&approach_low_toe):
+                    elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.9)) and ((current_point - prev_point)>5))&approach_low_toe):
                         toes_off = True
                         approach_low_toe = False
                         TOs.append(current_time)
@@ -194,11 +194,17 @@ for filename in os.listdir(directory):
                 second_prev_point =prev_point
                 prev_point = current_point
                 prev_time = current_time
+                
 
 
 
 
-
+        print()
+        print("peak: ", peak)
+        print("ICs: ", ICs)
+        print("TOs: ", TOs)
+        print("minipeak: ", minipeak)
+        print()
         # Open a new CSV file for writing
         with open((os.path.join(directory_for_saving, name + "_detected.csv")), "w", newline="") as csvfile:
             writer = csv.writer(csvfile)

@@ -30,8 +30,9 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
         if filename.endswith(".csv"):
             name = filename.split('_')
             print(filename)
-            if name[0] == "madeleine":
+            if name[0] == "GRT03":
                 continue
+
             imu = pd.read_csv(os.path.join(directory, filename))
             ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
             detected = pd.read_csv(os.path.join(directory_detected, filename.split('.csv')[0]+ "_detected.csv"))
@@ -138,13 +139,32 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
     THE_IC_delay = (sum(overallICslow)/len(overallICslow)+sum(overallICmed)/len(overallICmed)+sum(overallICfast)/len(overallICfast)+sum(overallICvary)/len(overallICvary))/4
     writer.writerow([THE_TO_delay, THE_IC_delay])
     writer.writerow([])
-    plt.figure(figsize=(20, 5))
+
+
+
+
+    ################################################################
+    ####################Plotting error##############################
+    plt.figure(figsize=(8, 5))
     plt.rcParams.update({'font.size': 20})
-    plt.scatter(overallTOslow, 0,  color='green', linewidth=1.0, zorder=1)
-    plt.scatter(overallTOmed, 1,  color='orange', linewidth=1.0, zorder=1)
-    plt.scatter(overallTOfast, 2,  color='red', linewidth=1.0, zorder=1)
-    plt.scatter(overallTOvary, 4,  color='blue', linewidth=1.0, zorder=1)
-    plt.title("Error TO")
+    plt.scatter( [0]*len(overallTOslow), overallTOslow, label="Slow",color='green', linewidth=1.0, zorder=1)
+    plt.scatter([1]*len(overallTOmed),  overallTOmed, label="Medium",color='orange', linewidth=1.0, zorder=1)
+    plt.scatter( [2]*len(overallTOfast), overallTOfast, label="Fast",color='red', linewidth=1.0, zorder=1)
+    plt.scatter( [3]*len(overallTOvary), overallTOvary, label="Varied",color='blue', linewidth=1.0, zorder=1)
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    plt.ylabel("Time (ms)")
+    plt.title("TO Delay")
+    plt.show()
+
+    plt.figure(figsize=(8, 5))
+    plt.rcParams.update({'font.size': 20})
+    plt.scatter( [0]*len(overallICslow), overallICslow, label="Slow",color='green', linewidth=1.0, zorder=1)
+    plt.scatter([1]*len(overallICmed),  overallICmed, label="Medium",color='orange', linewidth=1.0, zorder=1)
+    plt.scatter( [2]*len(overallICfast), overallICfast, label="Fast",color='red', linewidth=1.0, zorder=1)
+    plt.scatter( [3]*len(overallICvary), overallICvary, label="Varied",color='blue', linewidth=1.0, zorder=1)
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    plt.ylabel("Time (ms)")
+    plt.title("IC Delay")
     plt.show()
 
 

@@ -21,6 +21,8 @@ for filename in os.listdir(directory):
         name_split = name.split("_")
         if name_split[-1]=="truth":
             continue
+        print()
+        print(filename)
         #if name_split[0]!="becca":
             #continue
         with open(os.path.join(directory, filename), "r") as file:
@@ -32,12 +34,12 @@ for filename in os.listdir(directory):
             # Skip the header row
             next(imu)
             next(imu)
-            if name_split[0] == "madeleine":
+            if name_split[0] == "GRT03":
                 continue
             right_foot = 1
-            if name_split[0] == "becca" or name_split[0] == "ryan" or name_split[0] == "patrick" or name_split[0] =="sofya" or  name_split[0] =="josh":
+            if name_split[0] == "GRT07" or name_split[0] == "GRT09" or name_split[0] == "GRT05" or name_split[0] =="sofya" or  name_split[0] =="GRT02":
                 right_foot=-1
-            if name_split[0] == "madeleine" and name_split[-2]=="right":
+            if name_split[0] == "GRT03" and name_split[-2]=="right":
                 right_foot=-1
 
             TOs = []
@@ -48,8 +50,8 @@ for filename in os.listdir(directory):
             ICg = []
             peaktime = []
             peakvalue = []
-            peak_threshold = 300
-            low_threshold = -150
+            peak_threshold = 150
+            low_threshold = -100
             reached_peak = 0
             reached_IC = 0
             reached_TO = 0
@@ -62,6 +64,7 @@ for filename in os.listdir(directory):
 
                 if index <200:
                     continue
+
                 if len(row)<9:
                     continue
 
@@ -72,6 +75,7 @@ for filename in os.listdir(directory):
                 if (True):
                     
                     #peak
+                    
                     if current_point>peak_threshold and not reached_peak:
                         reached_peak = 1
                         peakvalue.append(current_point)
@@ -91,7 +95,15 @@ for filename in os.listdir(directory):
 
 
 
-
+        print("peaktime:", peaktime)
+        print("peakvalue:", peakvalue)
+        print()
+        print("ICs:", ICs)
+        print("ICg:", ICg)
+        print()
+        print("TOs:", TOs)
+        print("TOg:", TOg)
+        print()
         # Open a new CSV file for writing
         with open((os.path.join(directory_for_saving, name + "_hard_thresh_detected.csv")), "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
