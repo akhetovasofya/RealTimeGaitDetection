@@ -17,15 +17,15 @@ for filename in os.listdir(directory):
     if filename.endswith(".csv"):
 
         print(filename)
-        
-        name = filename.split('_')
+        name = filename.split('.csv')[0]
+        name = name.split('_')
         if name[1] == "med":
             name[1] = "Medium"
 
         if name[1] == "vary":
             name[1] = "Varying Speeds"
 
-        if name[0] != "GRT05":
+        if name[0] == "GRT03":
             continue
 
         right_foot = 1
@@ -33,8 +33,10 @@ for filename in os.listdir(directory):
             right_foot=-1
         if name[0] == "GRT03" and name[-2]=="right":
             right_foot=-1
-        pretty_name = "50m Walk" + " " + name[1]
-        name = filename.split('.csv')[0]
+        pretty_name = "50m Walk"
+        for i in range(0, len(name)-1):
+            pretty_name +=" " + name[i]
+        
 
         plt.figure(figsize=(20, 5))
         plt.rcParams.update({'font.size': 20})
