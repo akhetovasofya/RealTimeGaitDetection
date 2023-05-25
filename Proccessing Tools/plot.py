@@ -148,6 +148,8 @@ for filename in os.listdir(directory):
         plt.show()
         #plt.savefig(os.path.join(directory_of_graphs, name + ".png"))
 
+        break
+
 
         
 
