@@ -91,6 +91,8 @@ for filename in os.listdir(directory):
             isTOdelya = False
             isICdelya = False
             waitingtime = 0
+            goodTO = True
+            goodIC = True
 
 
             # Iterate through each row
@@ -131,9 +133,7 @@ for filename in os.listdir(directory):
                             if (not calibrated)or((max(callibration[step%3])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%3])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.1)):
                                     #good trial so put it's values
                                 pos_peak.append(max(callibration[step%3]))
-                                
                                 total_time.append(elapsed_time)
-                                standing_time.append(callibration_time[step%3][-1] - second_zero_time)
                                 index_mid_peak = callibration_time[step%3].index(second_zero_time)
                                 index_end_peak = int((len(callibration_time[step%3]) - index_mid_peak)/3*2)+index_mid_peak
                                 init_peak_time_frame = callibration[step%3][0:index_mid_peak]
@@ -142,13 +142,16 @@ for filename in os.listdir(directory):
                                 TOpeak.append(min(end_peak_time_frame))
                                 TOtime.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])])
                                 ICpeak.append(min(mid_peak_time_frame))
+                                ICtime.append(callibration_time[step%3][callibration[step%3].index(ICpeak[-1])])
+                                standing_time.append(TOtime[-1] - ICtime[-1])
                                 if calibrated&(len(ICs)!=0)&(len(TOs)!=0):
                                     print()
                                     print("IC delay: ", callibration_time[step%3][callibration[step%3].index(ICpeak[-1])], ICs[-1])
                                     print("TO delay: ", callibration_time[step%3][callibration[step%3].index(TOpeak[-1])], TOs[-1])
                                     print()
                                     ICdelay.append(callibration_time[step%3][callibration[step%3].index(ICpeak[-1])]-ICs[-1])
-                                    TOdelay.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-TOs[-1])
+                                    if goodTO:
+                                        TOdelay.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-TOs[-1])
                                 #if step!=0 and elapsed_time>1250:
                                     print("First time: ", callibration_time[step%3][0], "; Second time: ", callibration_time[step%3][-1])
                                     print("First in mid time: ", callibration_time[step%3][index_mid_peak:index_end_peak][0], "; Second in mid time: ", callibration_time[step%3][index_mid_peak:index_end_peak][-1])
@@ -166,6 +169,7 @@ for filename in os.listdir(directory):
                                 ICpeak.pop(0)
                             if len(ICdelay)>3:
                                 ICdelay.pop(0)
+                            if len(TOdelay)>3:
                                 TOdelay.pop(0)
                         callibration[step%3].clear()
                         callibration_time[step%3].clear()
@@ -187,6 +191,8 @@ for filename in os.listdir(directory):
                         at_mini_peak = False
                         approach_low_toe = False
                         peak.append(current_time)
+                        print()
+                        print("AT PEAK")
                     #what happend is threshold is bad for currernt
                     #at heel strike
                     elif (current_point<(sum(TOpeak)/len(TOpeak)*0.8) or (((current_point - prev_point)>5 and (current_point-second_prev_point)>0) and current_point<0))&at_max_peak:
@@ -202,7 +208,7 @@ for filename in os.listdir(directory):
                         heel_strike = False
                         at_mini_peak = True
                         minipeak.append(current_time)
-                            
+                          
                     #approaaching the low
                     elif ((current_point<(sum(TOpeak)/len(TOpeak)*0.5))&at_mini_peak):
                         if (current_time-time_from_IC)>sum(standing_time)/len(standing_time)*0.6:
@@ -212,6 +218,7 @@ for filename in os.listdir(directory):
                                 approach_low_toe = True
                                 TOs.append(current_time)
                                 TOg.append(current_point)
+                                goodTO = True
                             elif isTOdelya and (current_time-waitingtime)>(sum(TOdelay)/len(TOdelay)):
                                 print("Average time: ", (sum(TOdelay)/len(TOdelay)))
                                 print("delay time: ", (current_time-waitingtime))
@@ -219,15 +226,25 @@ for filename in os.listdir(directory):
                                 approach_low_toe = True
                                 TOs.append(current_time)
                                 TOg.append(current_point)
+                                goodTO = True
                                 isTOdelya = False
                             elif not isTOdelya:
                                 isTOdelya = True
                                 waitingtime = current_time
-                            
+                                print("waitingtime: ", waitingtime)
+
+
                     #at toes off #saving if toe never went off so have a positive
-                    elif (((current_point>(sum(TOpeak)/len(TOpeak)*0.9)) and ((current_point - prev_point)>5))&approach_low_toe):
+                    if (((current_point>(sum(TOpeak)/len(TOpeak)*0.9))&((current_point - prev_point)>2))&at_mini_peak&((current_time-time_from_IC)>(sum(standing_time)/len(standing_time)))):
                         toes_off = True
+                        isTOdelya = False
+                        at_mini_peak = False
                         approach_low_toe = False
+                        print("safe point on TO")
+                        print("Vel: ", (current_point - prev_point), " Time dif: ",(current_time-time_from_IC), " Needed time dif: ",(sum(standing_time)/len(standing_time)) )
+                        TOs.append(current_time)
+                        TOg.append(current_point)
+                        goodTO = False
                         
                     #saving if toe never went off
                 second_prev_point =prev_point
