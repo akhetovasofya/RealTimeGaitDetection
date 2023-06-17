@@ -118,8 +118,6 @@ for filename in os.listdir(directory):
                 callibration_time[step%3].append(current_time)
                 
 
-                
-
                 #recording swing and stance
                 #if 0 or sign change, then start recording.
                 if ((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point))): 
@@ -151,7 +149,11 @@ for filename in os.listdir(directory):
                                     print()
                                     ICdelay.append(callibration_time[step%3][callibration[step%3].index(ICpeak[-1])]-ICs[-1])
                                     if goodTO:
-                                        TOdelay.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-TOs[-1])
+                                        print()
+                                        print("TO Delay: ", TOdelay)
+                                        if callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-TOs[-1]!=0:
+                                            TOdelay.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-TOs[-1])
+                                        print("TO Delay appended : ", TOdelay[-1])
                                 #if step!=0 and elapsed_time>1250:
                                     print("First time: ", callibration_time[step%3][0], "; Second time: ", callibration_time[step%3][-1])
                                     print("First in mid time: ", callibration_time[step%3][index_mid_peak:index_end_peak][0], "; Second in mid time: ", callibration_time[step%3][index_mid_peak:index_end_peak][-1])
@@ -302,5 +304,5 @@ for filename in os.listdir(directory):
                     else:
                         writer.writerow([TOs[i], TOg[i], ICs[i], ICg[i], ogTOs[i], ogTOg[i]])
         #
-        # break
+        #break
 
