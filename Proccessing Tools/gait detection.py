@@ -25,8 +25,6 @@ for filename in os.listdir(directory):
         name_split = name.split("_")
         if name_split[-1]=="truth":
             continue
-        #if name_split[0]!="becca":
-            #continue
         with open(os.path.join(directory, filename), "r") as file:
             # Create a CSV reader
             imu = csv.reader(file)
@@ -67,11 +65,13 @@ for filename in os.listdir(directory):
             #for testing in time
             peak = [] #max peak
             TOs = []
+            ogTOs = []
             ICs = []
             minipeak = [] #peak between IC and TO
 
             #for graphing
             TOg = []
+            ogTOg = []
             ICg = []
 
             #
@@ -130,7 +130,7 @@ for filename in os.listdir(directory):
                         if (len(callibration[step%3])>0):
                             
 
-                            if (not calibrated)or((max(callibration[step%3])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%3])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.1)):
+                            if (not calibrated)or((max(callibration[step%3])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%3])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.6)):
                                     #good trial so put it's values
                                 pos_peak.append(max(callibration[step%3]))
                                 total_time.append(elapsed_time)
@@ -176,8 +176,9 @@ for filename in os.listdir(directory):
                         #print("cleared")
                         continue
                     if (((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point)))&first_zero):
+                        
                         second_zero = True# got to 2nd but we keep recording
-                        second_zero_time = current_time
+                        second_zero_time = current_time 
                     first_zero = True
 
                 #THIS IS WHERE DECISIONS HAPPENED
@@ -210,7 +211,7 @@ for filename in os.listdir(directory):
                         minipeak.append(current_time)
                           
                     #approaaching the low
-                    elif ((current_point<(sum(TOpeak)/len(TOpeak)*0.5))&at_mini_peak):
+                    elif ((current_point<(sum(TOpeak)/len(TOpeak)*0.8))&at_mini_peak):
                         if (current_time-time_from_IC)>sum(standing_time)/len(standing_time)*0.6:
                             #waiting for delay
                             if len(TOs)==0 or len(TOdelay)==0:
@@ -218,6 +219,8 @@ for filename in os.listdir(directory):
                                 approach_low_toe = True
                                 TOs.append(current_time)
                                 TOg.append(current_point)
+                                ogTOs.append(current_time)
+                                ogTOg.append(0)
                                 goodTO = True
                             elif isTOdelya and (current_time-waitingtime)>(sum(TOdelay)/len(TOdelay)):
                                 print("Average time: ", (sum(TOdelay)/len(TOdelay)))
@@ -229,14 +232,19 @@ for filename in os.listdir(directory):
                                 goodTO = True
                                 isTOdelya = False
                             elif not isTOdelya:
+                                ogTOs.append(current_time)
+                                ogTOg.append(current_point)
                                 isTOdelya = True
                                 waitingtime = current_time
                                 print("waitingtime: ", waitingtime)
 
 
                     #at toes off #saving if toe never went off so have a positive
-                    if (((current_point>(sum(TOpeak)/len(TOpeak)*0.9))&((current_point - prev_point)>2))&at_mini_peak&((current_time-time_from_IC)>(sum(standing_time)/len(standing_time)))):
+                    if (((current_point>(sum(TOpeak)/len(TOpeak)*0.9))&((current_point - prev_point)>5))&at_mini_peak&((current_time-time_from_IC)>(sum(standing_time)/len(standing_time)))):
                         toes_off = True
+                        if not isTOdelya:
+                            ogTOs.append(current_time)
+                            ogTOg.append(0)
                         isTOdelya = False
                         at_mini_peak = False
                         approach_low_toe = False
@@ -256,10 +264,17 @@ for filename in os.listdir(directory):
 
 
         print()
+        print("POINTS:")
         print("TOtime: ", TOtime)
         #print("peak: ", peak)
         print("ICs: ", ICs)
         print("TOs: ", TOs)
+        print("ogTOs: ", ogTOs)
+        print()
+        print("LENGTHS:")
+        print("ICs: ", len(ICs))
+        print("TOs: ", len(TOs))
+        print("ogTOs: ", len(ogTOs))
         #print("minipeak: ", minipeak)
         print()
         print("ICdelay: ",ICdelay)
@@ -268,23 +283,24 @@ for filename in os.listdir(directory):
         # Open a new CSV file for writing
         with open((os.path.join(directory_for_saving, name + "_detected.csv")), "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(["TO time","TO value", "IC time", "IC value"])
+            writer.writerow(["TO time","TO value", "IC time", "IC value", "ogTO time","ogTO value"])
             #if TO is longer than IC
-            TOs = TOs[0:-1]
-            ICs = ICs[0:-1]
-            TOg = TOg[0:-1]
-            ICg = ICg[0:-1]
+            #TOs = TOs[0:-1]
+            #ICs = ICs[0:-1]
+            #TOg = TOg[0:-1]
+            #ICg = ICg[0:-1]
             if len(TOs)>=len(ICs):
                 for i in range(0,len(TOs)):
                     if i >=len(ICs):
-                        writer.writerow([TOs[i], TOg[i], "", ""])
+                        writer.writerow([TOs[i], TOg[i], "", "",ogTOs[i], ogTOg[i] ])
                     else:
-                        writer.writerow([TOs[i], TOg[i], ICs[i], ICg[i]])
+                        writer.writerow([TOs[i], TOg[i], ICs[i], ICg[i], ogTOs[i], ogTOg[i]])
             else:
                 for i in range(0,len(ICs)):
                     if i >=len(TOs):
-                        writer.writerow(["","", ICs[i], ICg[i]])
+                        writer.writerow(["","", ICs[i], ICg[i], "", ""])
                     else:
-                        writer.writerow([TOs[i], TOg[i], ICs[i], ICg[i]])
-        break
+                        writer.writerow([TOs[i], TOg[i], ICs[i], ICg[i], ogTOs[i], ogTOg[i]])
+        #
+        # break
 

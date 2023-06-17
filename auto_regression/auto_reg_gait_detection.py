@@ -108,9 +108,13 @@ with open("medium50m1excel.csv", "r") as file:
                         #print("STEP FINISHED")
                         
                         if calibrated:
-                            param = AutoReg(callibration[step%2], lags = 15, exog = callibration_time[step%2]).fit()
-                            print(callibration_time[step%2][-1])
-                            prediction = param.predict(start=0, end=2000, dynamic=False, exog=callibration_time[step%2], exog_oos=None)
+                            what_we_feed_in = [0]*len(callibration[(step-1)%2])
+                            what_we_feed_in[callibration[(step-1)%2].index(min(callibration[(step-1)%2]))] = -1
+                            what_we_feed_in[callibration[(step-1)%2].index(max(callibration[(step-1)%2]))] = 1
+                            print(what_we_feed_in)
+                            print("Length: ", len(what_we_feed_in), " and ", len(callibration[(step-1)%2]))
+                            param = AutoReg(what_we_feed_in, exog = callibration[(step-1)%2]).fit()
+                            prediction = param.predict(start=0, end=len(callibration[step%2]), dynamic=False, exog=callibration[step%2], exog_oos=None)
                             plt.plot(callibration_time[step%2], prediction, label="Prediction", linewidth=2.0, zorder=-1)
                             plt.plot(callibration_time[step%2], callibration[step%2], label="Recorded", linewidth=1.0, zorder=-1)
                             plt.legend(loc='upper left', bbox_to_anchor=(1, 1))

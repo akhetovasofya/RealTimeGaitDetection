@@ -12,7 +12,7 @@ directory_final_calculations = global_variables.directory_final_calculations
 
 with open((os.path.join(directory_final_calculations, "Final_Calculations.csv")), "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(["Which file:", "TO average delay", "IC average delay"])
+    writer.writerow(["Which file:", "TO average delay", "IC average delay", "TO misses", "IC misses"])
     overallTOslow = []
     overallICslow = []
     overallTOmed = []
@@ -24,11 +24,10 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
 
     for filename in os.listdir(directory):
         # Check if the file is a .log file
-        #if filename.split('_')[0] != "tyler":
-        #    continue
 
         if filename.endswith(".csv"):
             name = filename.split('_')
+            print(filename)
             print(filename)
             if name[0] == "GRT03":
                 continue
@@ -53,82 +52,97 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             ICg_old = detected[detected.columns[3]]
             ICg_old = ICg_old.values.tolist()
 
+            ##############################Filtering Nans out of Ground truth
+            groundTO = []
+            groundIC = []
+            for i in range(0, len(TOtime_old)):
+                if TOtime_old[i] == TOtime_old[i]:
+                    groundTO.append(TOtime_old[i])
+            for i in range(0, len(ICtime_old)):
+                if ICtime_old[i] == ICtime_old[i]:
+                    groundIC.append(ICtime_old[i])
+
             ##############################################################################################
             ###############getting error#################################################################
             #deleting unused
             #deleting unused
-            TOtime = []
-            ICtime = []
             ICs = []
             ICg = []
             TOs = []
             TOg = []
             for i in range(0, len(TOs_old)):
                 if TOs_old[i] == TOs_old[i]:
-                    TOs.append(TOs_old[i]) # deleting NaNs
-                    TOg.append(TOg_old[i]) # deleting NaNs
+                    
+                    if (groundTO[0]-TOs_old[i])<200 and (groundTO[-1]-TOs_old[i])>-200: #cutting off edges
+                        TOs.append(TOs_old[i]) # deleting NaNs
+                        TOg.append(TOg_old[i]) # deleting NaNs
+                    else:
+                        print("TO IF: 1st is ", groundTO[0]-TOs_old[i], " and 2nd is ", groundTO[-1]-TOs_old[i])
             for i in range(0, len(ICs_old)):
                 if ICs_old[i] == ICs_old[i]:
-                    ICs.append(ICs_old[i]) # deleting NaNs
-                    ICg.append(ICg_old[i]) # deleting NaNs
-            for i in range(0, len(TOtime)):
-                if TOtime[i] != TOtime[i]:
-                    del TOtime[i] # deleting NaNs
-            for i in range(0, len(ICtime)):
-                if ICtime[i] != ICtime[i]:
-                    del ICtime[i] # deleting NaNs
+                    if (groundIC[0]-ICs_old[i])<200 and (groundIC[-1]-ICs_old[i])>-200: #cutting off edges
+                        ICs.append(ICs_old[i]) # deleting NaNs
+                        ICg.append(ICg_old[i]) # deleting NaNs
+                    else:
+                        print("IC IF: 1st is ", groundIC[0]-ICs_old[i], " and 2nd is ", groundIC[-1]-ICs_old[i])
+
 
             if len(TOs) == 0 or len(ICs) == 0:
+                print("ICs_old: ",ICs_old )
+                print("ICs_old: ",TOs_old )
                 print("ERRROR IN DETECTED")
                 continue
 
-            if ICs[0]>TOs[0]:
-                first_detected = TOs[0]-200
-            else:
-                first_detected = ICs[0]-200
+           
+
+           ################################################################################
+           ##########################
+
+
+           #detect error and points missed
+            TOerror = []
+            TOmisses = 0
+            if_got_point = True
+            for i in range(1, len(groundTO)):
+                if not if_got_point:
+                    TOmisses+=1
+                if_got_point = False
+                for j in range(0,len(TOs) ):
+                    if abs(groundTO[i]-TOs[j]) < 200:
+                        TOerror.append(groundTO[i]-TOs[j])
+                        if_got_point = True
             
-            if ICs[-1]>TOs[-1]:
-                last_detected = ICs[-1]+200
-            else:
-                last_detected = TOs[-1]+200
+            ICerror = []
+            ICmisses = 0
+            if_got_point = True
+            for i in range(1, len(groundIC)):
+                if not if_got_point:
+                    ICmisses+=1
+                if_got_point = False
+                for j in range(0,len(ICs) ):
+                    if abs(groundIC[i]-ICs[j]) < 200:
+                        ICerror.append(groundIC[i]-ICs[j])
+                        if_got_point = True
 
 
-            ICtime = []
-            TOtime = []
-            for ic_index in ICtime_old:
-                if ic_index>first_detected and ic_index<last_detected:
-                    ICtime.append(ic_index)
-            for to_index in TOtime_old:
-                if to_index>first_detected and to_index<last_detected:
-                    TOtime.append(to_index)
-
-            IC = [0]*len(ICtime)
-            TO = [0]*len(TOtime)
-            ######################################
-            #for i in range(0, len(ICtime)):
-                #difIC.append(ICtime[i]-ICs[i])
-           # for i in range(0, len(TOtime)):
-                #difTO.append(TOtime[i]-TOs[i])
-            ICerror = (sum(ICtime)-sum(ICs))/len(ICs)
-            TOerror = (sum(TOtime)-sum(TOs))/len(TOs)
             #print(TOs)
             #print(TOtime)
             if name[1] == "slow":
-                overallICslow.append(ICerror)
-                overallTOslow.append(TOerror)
+                overallICslow.append(sum(ICerror)/len(ICerror))
+                overallTOslow.append(sum(TOerror)/len(TOerror))
             elif name[1] == "med":
-                overallICmed.append(ICerror)
-                overallTOmed.append(TOerror)
+                overallICmed.append(sum(ICerror)/len(ICerror))
+                overallTOmed.append(sum(TOerror)/len(TOerror))
             elif name[1] == "fast":
-                overallICfast.append(ICerror)
-                overallTOfast.append(TOerror)
+                overallICfast.append(sum(ICerror)/len(ICerror))
+                overallTOfast.append(sum(TOerror)/len(TOerror))
             elif name[1] == "vary":
-                overallICvary.append(ICerror)
-                overallTOvary.append(TOerror)
-            writer.writerow([filename, TOerror, ICerror])
-            writer.writerow(TOtime)
+                overallICvary.append(sum(ICerror)/len(ICerror))
+                overallTOvary.append(sum(TOerror)/len(TOerror))
+            writer.writerow([filename, sum(TOerror)/len(TOerror), sum(ICerror)/len(ICerror),TOmisses, ICmisses])
+            writer.writerow(groundTO)
             writer.writerow(TOs)
-            writer.writerow(ICtime)
+            writer.writerow(groundIC)
             writer.writerow(ICs)
             writer.writerow([])
     writer.writerow(["overallTOslow: ", "overallICslow: ", "overallTOmed: ", "overallICmed: ", "overallTOfast: ", "overallICfast: ", "overallTOvary: ", "overallICvary: "])

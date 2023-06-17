@@ -69,6 +69,10 @@ for filename in os.listdir(directory):
         ICs_old = ICs_old.values.tolist()
         ICg_old = detected[detected.columns[3]]
         ICg_old = ICg_old.values.tolist()
+        ogTOs_old = detected[detected.columns[4]]
+        ogTOs_old = ogTOs_old.values.tolist()
+        ogTOg_old = detected[detected.columns[5]]
+        ogTOg_old = ogTOg_old.values.tolist()
 
         
         
@@ -101,39 +105,17 @@ for filename in os.listdir(directory):
             continue
         
 
-        ##################################################
-        ########removing before and after detected
-        if ICs[0]>TOs[0]:
-            first_detected = TOs[0]-200
-        else:
-            first_detected = ICs[0]-200
-        
-        if ICs[-1]>TOs[-1]:
-            last_detected = ICs[-1]+200
-        else:
-            last_detected = TOs[-1]+200
-
-
-        for ic_index in ICtime_old:
-            if ic_index>first_detected and ic_index<last_detected:
-                ICtime.append(ic_index)
-        for to_index in TOtime_old:
-            if to_index>first_detected and to_index<last_detected:
-                TOtime.append(to_index)
-        
-        ########################################################
-        ########################################################
-
-        IC = [0]*len(ICtime)
-        TO = [0]*len(TOtime)
+        IC = [0]*len(TOtime_old)
+        TO = [0]*len(ICtime_old)
         #TO
-        plt.scatter(TOtime, TO, marker='o',s=10, label="TO from FSR", facecolors='none', edgecolors='purple', linewidth=1.0, zorder=1)
+        plt.scatter(TOtime_old, TO, marker='o',s=10, label="TO from FSR", facecolors='none', edgecolors='purple', linewidth=1.0, zorder=1)
         #IC
-        plt.scatter(ICtime, IC, marker='o',s=10, label="IC from FSR", facecolors='none', edgecolors='red',linewidth=1.0, zorder=1)
+        plt.scatter(ICtime_old, IC, marker='o',s=10, label="IC from FSR", facecolors='none', edgecolors='red',linewidth=1.0, zorder=1)
         
 
         plt.scatter(ICs, ICg, label="IC detected", color='red', linewidth=1.0, zorder=1)
         plt.scatter(TOs, TOg, label="TO detected", color='purple', linewidth=1.0, zorder=1)
+        plt.scatter(ogTOs_old, ogTOg_old, label="ogTO detected", color='blue', linewidth=1.0, zorder=1)
 
         
 
@@ -148,7 +130,7 @@ for filename in os.listdir(directory):
         plt.show()
         #plt.savefig(os.path.join(directory_of_graphs, name + ".png"))
 
-        break
+        #break
 
 
         
