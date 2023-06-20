@@ -151,8 +151,8 @@ for filename in os.listdir(directory):
                                     if goodTO:
                                         print()
                                         print("TO Delay: ", TOdelay)
-                                        if callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-TOs[-1]!=0:
-                                            TOdelay.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-TOs[-1])
+                                        if callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-ogTOs[-1]!=0:
+                                            TOdelay.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-ogTOs[-1])
                                         print("TO Delay appended : ", TOdelay[-1])
                                 #if step!=0 and elapsed_time>1250:
                                     print("First time: ", callibration_time[step%3][0], "; Second time: ", callibration_time[step%3][-1])
@@ -242,7 +242,7 @@ for filename in os.listdir(directory):
 
 
                     #at toes off #saving if toe never went off so have a positive
-                    if (((current_point>(sum(TOpeak)/len(TOpeak)*0.9))&((current_point - prev_point)>5))&at_mini_peak&((current_time-time_from_IC)>(sum(standing_time)/len(standing_time)))):
+                    if (((current_point>(sum(TOpeak)/len(TOpeak)))&((current_point - prev_point)>5))&at_mini_peak&((current_time-time_from_IC)>(sum(standing_time)/len(standing_time)))):
                         toes_off = True
                         if not isTOdelya:
                             ogTOs.append(current_time)
