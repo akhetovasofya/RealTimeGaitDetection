@@ -34,7 +34,7 @@ for filename in os.listdir(directory):
             # Skip the header row
             next(imu)
             next(imu)
-            if name_split[0] == "GRT03":
+            if name_split[0] == "GRT03" and name_split[0] !="GRT02_fast_01.csv":
                 continue
             right_foot = 1
             if name_split[0] == "GRT07" or name_split[0] == "GRT09" or name_split[0] == "GRT05" or name_split[0] =="sofya" or  name_split[0] =="GRT02":
@@ -362,5 +362,5 @@ for filename in os.listdir(directory):
                     TOpeak_putin = TOpeak[i]
                 writer.writerow([TOtime_putin, TOpeak_putin, ICtime_putin, ICpeak_putin, ogTOputinS, ogTOputinG, ogICputinS, ogICputinG])
         #
-        break
+        #break
 

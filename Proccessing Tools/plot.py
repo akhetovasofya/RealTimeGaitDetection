@@ -25,7 +25,7 @@ for filename in os.listdir(directory):
         if name[1] == "vary":
             name[1] = "Varying Speeds"
 
-        if name[0] == "GRT03":
+        if name[0] == "GRT03" :
             continue
 
         right_foot = 1
