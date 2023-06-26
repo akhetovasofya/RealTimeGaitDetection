@@ -66,12 +66,14 @@ for filename in os.listdir(directory):
             peak = [] #max peak
             TOs = []
             ogTOs = []
+            ogICg = []
             ICs = []
             minipeak = [] #peak between IC and TO
 
             #for graphing
             TOg = []
             ogTOg = []
+            ogICs = []
             ICg = []
 
             #
@@ -100,8 +102,8 @@ for filename in os.listdir(directory):
                 # Access individual values by index
                 #print(row[9], row[6])
 
-                if index <200:
-                    continue
+                #if index <200:
+                #    continue
                 if len(row)<9:
                     continue
 
@@ -130,53 +132,73 @@ for filename in os.listdir(directory):
 
                             if (not calibrated)or((max(callibration[step%3])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%3])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.6)):
                                     #good trial so put it's values
+                                print("calib time: ", callibration_time[step%3])
+                                print("values: ", callibration[step%3] )
                                 pos_peak.append(max(callibration[step%3]))
                                 total_time.append(elapsed_time)
-                                index_mid_peak = callibration_time[step%3].index(second_zero_time)
-                                index_end_peak = int((len(callibration_time[step%3]) - index_mid_peak)/3*2)+index_mid_peak
-                                init_peak_time_frame = callibration[step%3][0:index_mid_peak]
-                                mid_peak_time_frame = callibration[step%3][index_mid_peak:index_end_peak]
-                                end_peak_time_frame = callibration[step%3][index_end_peak:-1]
-                                TOpeak.append(min(end_peak_time_frame))
-                                TOtime.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])])
-                                ICpeak.append(min(mid_peak_time_frame))
-                                ICtime.append(callibration_time[step%3][callibration[step%3].index(ICpeak[-1])])
+                                if calibrated:
+                                    which_middle_index = callibration_time[step%3].index(minipeak[-1])
+                                else:
+                                    which_middle_index = int(len(callibration[step%3])/3*2)
+                                print("which_middle_index: ", which_middle_index)
+                                print("value at index : ", callibration[step%3][which_middle_index])
+                                print("time at index : ", callibration_time[step%3][which_middle_index])
+                                mid_peak_frame = callibration[step%3][0:which_middle_index]
+                                mid_peak_frame_time = callibration_time[step%3][0:which_middle_index]
+                                end_peak_frame = callibration[step%3][which_middle_index:-1]
+                                end_peak_frame_time = callibration_time[step%3][which_middle_index:-1]
+
+                                print("mid_peak_time_frame: ",mid_peak_frame )
+                                print("end_peak_time_frame: ", end_peak_frame)
+
+                                
+                                TOpeak.append(min(end_peak_frame))
+                                TOtime.append(end_peak_frame_time[end_peak_frame.index(TOpeak[-1])])
+                                ICpeak.append(min(mid_peak_frame))
+                                ICtime.append(mid_peak_frame_time[mid_peak_frame.index(ICpeak[-1])])
                                 standing_time.append(TOtime[-1] - ICtime[-1])
+
+                                print()
+                                print("NEW AVERAGES: ")
+                                print("TO: ",sum(TOpeak)/len(TOpeak) )
+                                print(TOpeak)
+                                print(TOtime)
+                                print("IC: ",sum(ICpeak)/len(ICpeak) )
+                                print(ICpeak)
+                                print(ICtime)
                                 if calibrated&(len(ICs)!=0)&(len(TOs)!=0):
-                                    print()
-                                    print("IC delay: ", callibration_time[step%3][callibration[step%3].index(ICpeak[-1])], ICs[-1])
-                                    print("TO delay: ", callibration_time[step%3][callibration[step%3].index(TOpeak[-1])], TOs[-1])
-                                    print()
-                                    ICdelay.append(callibration_time[step%3][callibration[step%3].index(ICpeak[-1])]-ICs[-1])
+                                    
+                                    print("IC Delay: ", ICdelay)
+                                    if callibration_time[step%3][callibration[step%3].index(ICpeak[-1])]-ogICs[-1]!=0:
+                                        ICdelay.append(callibration_time[step%3][callibration[step%3].index(ICpeak[-1])]-ogICs[-1])
+                                    print("IC Delay appended : ", ICdelay[-1])
                                     if goodTO:
                                         print()
                                         print("TO Delay: ", TOdelay)
                                         if callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-ogTOs[-1]!=0:
                                             TOdelay.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-ogTOs[-1])
                                         print("TO Delay appended : ", TOdelay[-1])
-                                #if step!=0 and elapsed_time>1250:
-                                    print("First time: ", callibration_time[step%3][0], "; Second time: ", callibration_time[step%3][-1])
-                                    print("First in mid time: ", callibration_time[step%3][index_mid_peak:index_end_peak][0], "; Second in mid time: ", callibration_time[step%3][index_mid_peak:index_end_peak][-1])
                                     
                                 calibrated = True
                                 step+=1 #done with recording
 
-                            #taking out old
-                            if len(total_time)>3:
-                                
-                                pos_peak.pop(0)
-                                TOpeak.pop(0)
-                                total_time.pop(0)
-                                standing_time.pop(0)
-                                ICpeak.pop(0)
-                            if len(ICdelay)>3:
-                                ICdelay.pop(0)
-                            if len(TOdelay)>3:
-                                TOdelay.pop(0)
-                        callibration[step%3].clear()
-                        callibration_time[step%3].clear()
-                        #print("cleared")
-                        continue
+                                #taking out old
+                                if len(total_time)>3:
+                                    pos_peak.pop(0)
+                                    #TOpeak.pop(0)
+                                    #TOtime.pop(0)
+                                    total_time.pop(0)
+                                    standing_time.pop(0)
+                                    #ICpeak.pop(0)
+                                    #ICtime.pop(0)
+                                if len(ICdelay)>3:
+                                    ICdelay.pop(0)
+                                if len(TOdelay)>3:
+                                    TOdelay.pop(0)
+                                callibration[step%3].clear()
+                                callibration_time[step%3].clear()
+                                #print("cleared")
+                                continue
                     if (((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point)))&first_zero):
                         
                         second_zero = True# got to 2nd but we keep recording
@@ -198,25 +220,51 @@ for filename in os.listdir(directory):
                         print("AT PEAK")
                     #what happend is threshold is bad for currernt
                     #at heel strike
-                    elif (current_point<(sum(TOpeak)/len(TOpeak)*0.8) or (((current_point - prev_point)>5 and (current_point-second_prev_point)>0) and current_point<0))&at_max_peak:
-                        heel_strike = True
-                        at_max_peak = False
-                        ICs.append(current_time)
-                        ICg.append(current_point)
-                        time_from_IC = current_time
-                              
+                    elif (current_point<(sum(ICpeak)/len(ICpeak)*0.8) or (((current_point - prev_point)>5 and (current_point-second_prev_point)>0) and current_point<0))&at_max_peak:
+                        
+                        if len(ICs)==0 or len(ICdelay)==0:
+                            print("AT HEEL STRIKE")
+                            ICs.append(current_time)
+                            ICg.append(current_point)
+                            heel_strike = True
+                            at_max_peak = False
+                            time_from_IC = current_time
+                            ogICs.append(current_time)
+                            ogICg.append(current_point)
+                        elif isICdelya and (current_time-waitingtime)>(sum(ICdelay)/len(ICdelay)):
+                            print("AT HEEL STRIKE")
+                            print("Average time: ", (sum(ICdelay)/len(ICdelay)))
+                            print("delay time: ", (current_time-waitingtime))
+                            heel_strike = True
+                            at_max_peak = False
+                            time_from_IC = current_time
+                            ICs.append(current_time)
+                            ICg.append(current_point)
+                            isICdelya = False
+                        elif not isICdelya:
+                            waitingtime = current_time
+                            ogICs.append(current_time)
+                            ogICg.append(current_point)
+                            isICdelya = True
+                        
+                        
 
                     #mini peak (having a time contraint for noisy data)
-                    elif ((current_point>(sum(TOpeak)/len(TOpeak)*0.5))&heel_strike&(sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC))):
-                        heel_strike = False
-                        at_mini_peak = True
-                        minipeak.append(current_time)
+                    #
+                    elif (current_point>(sum(TOpeak)/len(TOpeak)*0.5))&heel_strike:
+                        print("TIMES AT MINI PEAK: ", standing_time )
+                        if (sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC)):
+                            heel_strike = False
+                            at_mini_peak = True
+                            print("AT MINI PEAK: ", current_time)
+                            minipeak.append(current_time)
                           
                     #approaaching the low
                     elif ((current_point<(sum(TOpeak)/len(TOpeak)*0.8))&at_mini_peak):
                         if (current_time-time_from_IC)>sum(standing_time)/len(standing_time)*0.6:
                             #waiting for delay
                             if len(TOs)==0 or len(TOdelay)==0:
+                                print("AT TO")
                                 at_mini_peak = False
                                 approach_low_toe = True
                                 TOs.append(current_time)
@@ -225,6 +273,7 @@ for filename in os.listdir(directory):
                                 ogTOg.append(0)
                                 goodTO = True
                             elif isTOdelya and (current_time-waitingtime)>(sum(TOdelay)/len(TOdelay)):
+                                print("AT TO")
                                 print("Average time: ", (sum(TOdelay)/len(TOdelay)))
                                 print("delay time: ", (current_time-waitingtime))
                                 at_mini_peak = False
@@ -244,13 +293,13 @@ for filename in os.listdir(directory):
                     #at toes off #saving if toe never went off so have a positive
                     if (((current_point>(sum(TOpeak)/len(TOpeak)))&((current_point - prev_point)>5))&at_mini_peak&((current_time-time_from_IC)>(sum(standing_time)/len(standing_time)))):
                         toes_off = True
+                        print("AT TO SAFE POINT")
                         if not isTOdelya:
                             ogTOs.append(current_time)
                             ogTOg.append(0)
                         isTOdelya = False
                         at_mini_peak = False
                         approach_low_toe = False
-                        print("safe point on TO")
                         print("Vel: ", (current_point - prev_point), " Time dif: ",(current_time-time_from_IC), " Needed time dif: ",(sum(standing_time)/len(standing_time)) )
                         TOs.append(current_time)
                         TOg.append(current_point)
@@ -285,24 +334,33 @@ for filename in os.listdir(directory):
         # Open a new CSV file for writing
         with open((os.path.join(directory_for_saving, name + "_detected.csv")), "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(["TO time","TO value", "IC time", "IC value", "ogTO time","ogTO value"])
+            writer.writerow(["TO time detected","TO value detected", "IC time detected", "IC value detected", "ogTO time","ogTO value","ogIC time","ogIC value"])
             #if TO is longer than IC
-            #TOs = TOs[0:-1]
-            #ICs = ICs[0:-1]
-            #TOg = TOg[0:-1]
-            #ICg = ICg[0:-1]
-            if len(TOs)>=len(ICs):
-                for i in range(0,len(TOs)):
-                    if i >=len(ICs):
-                        writer.writerow([TOs[i], TOg[i], "", "",ogTOs[i], ogTOg[i] ])
-                    else:
-                        writer.writerow([TOs[i], TOg[i], ICs[i], ICg[i], ogTOs[i], ogTOg[i]])
-            else:
-                for i in range(0,len(ICs)):
-                    if i >=len(TOs):
-                        writer.writerow(["","", ICs[i], ICg[i], "", ""])
-                    else:
-                        writer.writerow([TOs[i], TOg[i], ICs[i], ICg[i], ogTOs[i], ogTOg[i]])
+            longestTime = len(ICtime)
+            if len(TOtime)>=len(ICtime):
+                longestTime = len(TOtime)
+            for i in range(0,longestTime):
+                ogICputinS = ""
+                ogICputinG = ""
+                ogTOputinS = ""
+                ogTOputinG = ""
+                TOpeak_putin = ""
+                TOtime_putin = ""
+                ICpeak_putin = ""
+                ICtime_putin = ""
+                if i<len(ogICs):
+                    ogICputinS = ogICs[i]
+                    ogICputinG = ogICg[i]
+                if i<len(ogTOs):
+                    ogTOputinS = ogTOs[i]
+                    ogTOputinG = ogTOg[i]
+                if i <len(ICtime):
+                    ICtime_putin = ICtime[i]
+                    ICpeak_putin = ICpeak[i]
+                if i <len(TOtime):
+                    TOtime_putin = TOtime[i]
+                    TOpeak_putin = TOpeak[i]
+                writer.writerow([TOtime_putin, TOpeak_putin, ICtime_putin, ICpeak_putin, ogTOputinS, ogTOputinG, ogICputinS, ogICputinG])
         #
-        #break
+        break
 
