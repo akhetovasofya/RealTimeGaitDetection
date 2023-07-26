@@ -5,13 +5,15 @@ import os
 import csv
 # Set the directory path to search for .log files
 import global_variables
-directory = global_variables.directory
-directory_for_saving = global_variables.directory_ground_truth
-for filename in os.listdir(directory):
-    # Check if the file is a .log file
-    #if filename.split('_')[0]:
 
-    
+import numpy as np
+from scipy.signal import argrelextrema
+
+
+directory = global_variables.directory
+directory_for_saving = global_variables.directory_file_truth
+for filename in os.listdir(directory):
+
     if filename.endswith(".csv"):
         name = filename.split('.csv')[0]
         name_sections = filename.split('_')
@@ -20,16 +22,14 @@ for filename in os.listdir(directory):
         imu = pd.read_csv(os.path.join(directory, filename))
 
         #getting IC and TO from data
-        
-        ICtime = []
-        TOtime =[]
+        argrelextrema(imu, np.less)
 
 
         time_protection = 500
         #detect fast changes in velocity for toes off
         threshold_TO = -7
         prev_time_index = 0
-        for i in range(3, len(imu[imu.columns[7]])):
+        for i in range(0, len(imu[imu.columns[7]])):
             diff = imu[imu.columns[7]][i-1] -imu[imu.columns[7]][i]
             if diff == imu[imu.columns[7]][i-1] and diff!=0 and (imu[imu.columns[7]][i-2]>3 or imu[imu.columns[7]][i-3]>3):
                 TOtime.append(imu[imu.columns[9]][i])
@@ -54,8 +54,8 @@ for filename in os.listdir(directory):
     
     
         # Open a new CSV file for writing
-        with open((os.path.join(directory_for_saving, name + "_ground_truth.csv")), "w", newline="") as csvfile:
-            print(name + "_ground_truth.csv")
+        with open((os.path.join(directory_for_saving, name + "_file_truth.csv")), "w", newline="") as csvfile:
+            print(name + "_file_truth.csv")
             
             writer = csv.writer(csvfile)
             writer.writerow(["TO", "IC"])

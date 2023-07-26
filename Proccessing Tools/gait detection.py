@@ -18,6 +18,7 @@ prev_time = 0
 import global_variables
 directory = global_variables.directory
 directory_for_saving = global_variables.directory_detected
+directory_for_saving_file_truth = global_variables.directory_file_truth
 for filename in os.listdir(directory):
     
     if filename.endswith(".csv"):
@@ -34,7 +35,7 @@ for filename in os.listdir(directory):
             # Skip the header row
             next(imu)
             next(imu)
-            if name_split[0] == "GRT03" and name_split[0] !="GRT02_fast_01.csv":
+            if name_split[0] == "GRT03":
                 continue
             right_foot = 1
             if name_split[0] == "GRT07" or name_split[0] == "GRT09" or name_split[0] == "GRT05" or name_split[0] =="sofya" or  name_split[0] =="GRT02":
@@ -334,7 +335,7 @@ for filename in os.listdir(directory):
         # Open a new CSV file for writing
         with open((os.path.join(directory_for_saving, name + "_detected.csv")), "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(["TO time detected","TO value detected", "IC time detected", "IC value detected", "ogTO time","ogTO value","ogIC time","ogIC value"])
+            writer.writerow(["TO time detected","TO value detected", "IC time detected", "IC value detected", "actual TO time","actual TO value","actual IC time","actual IC value"])
             #if TO is longer than IC
             longestTime = len(ICtime)
             if len(TOtime)>=len(ICtime):
@@ -348,19 +349,19 @@ for filename in os.listdir(directory):
                 TOtime_putin = ""
                 ICpeak_putin = ""
                 ICtime_putin = ""
-                if i<len(ogICs):
-                    ogICputinS = ogICs[i]
-                    ogICputinG = ogICg[i]
-                if i<len(ogTOs):
-                    ogTOputinS = ogTOs[i]
-                    ogTOputinG = ogTOg[i]
+                if i<len(ICs):
+                    ogICputinS = ICs[i]
+                    ogICputinG = ICg[i]
+                if i<len(TOs):
+                    ogTOputinS = TOs[i]
+                    ogTOputinG = TOg[i]
                 if i <len(ICtime):
                     ICtime_putin = ICtime[i]
                     ICpeak_putin = ICpeak[i]
                 if i <len(TOtime):
                     TOtime_putin = TOtime[i]
                     TOpeak_putin = TOpeak[i]
-                writer.writerow([TOtime_putin, TOpeak_putin, ICtime_putin, ICpeak_putin, ogTOputinS, ogTOputinG, ogICputinS, ogICputinG])
+                writer.writerow([ogTOputinS, ogTOputinG, ogICputinS, ogICputinG, TOtime_putin, TOpeak_putin, ICtime_putin, ICpeak_putin])
         #
         #break
 

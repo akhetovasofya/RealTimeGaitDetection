@@ -73,6 +73,10 @@ for filename in os.listdir(directory):
         ogTOs_old = ogTOs_old.values.tolist()
         ogTOg_old = detected[detected.columns[5]]
         ogTOg_old = ogTOg_old.values.tolist()
+        ogICs_old = detected[detected.columns[6]]
+        ogICs_old = ogICs_old.values.tolist()
+        ogICg_old = detected[detected.columns[7]]
+        ogICg_old = ogICg_old.values.tolist()
 
         
         
@@ -85,6 +89,10 @@ for filename in os.listdir(directory):
         ICg = []
         TOs = []
         TOg = []
+        ogICs = []
+        ogICg = []
+        ogTOs = []
+        ogTOg = []
         for i in range(0, len(TOs_old)):
             if TOs_old[i] == TOs_old[i]:
                 TOs.append(TOs_old[i]) # deleting NaNs
@@ -93,6 +101,16 @@ for filename in os.listdir(directory):
             if ICs_old[i] == ICs_old[i]:
                 ICs.append(ICs_old[i]) # deleting NaNs
                 ICg.append(ICg_old[i]) # deleting NaNs
+
+        for i in range(0, len(ogTOs_old)):
+            if ogTOs_old[i] == ogTOs_old[i]:
+                ogTOs.append(ogTOs_old[i]) # deleting NaNs
+                ogTOg.append(ogTOg_old[i]) # deleting NaNs
+        for i in range(0, len(ogICs_old)):
+            if ogICs_old[i] == ogICs_old[i]:
+                ogICs.append(ogICs_old[i]) # deleting NaNs
+                ogICg.append(ogICg_old[i]) # deleting NaNs
+
         for i in range(0, len(TOtime)):
             if TOtime[i] != TOtime[i]:
                 del TOtime[i] # deleting NaNs
@@ -113,9 +131,10 @@ for filename in os.listdir(directory):
         plt.scatter(ICtime_old, IC, marker='o',s=10, label="IC from FSR", facecolors='none', edgecolors='red',linewidth=1.0, zorder=1)
         
 
-        plt.scatter(ICs, ICg, label="IC detected", color='red', linewidth=1.0, zorder=1)
-        plt.scatter(TOs, TOg, label="TO detected", color='purple', linewidth=1.0, zorder=1)
-        plt.scatter(ogTOs_old, ogTOg_old, label="ogTO detected", color='blue', linewidth=1.0, zorder=1)
+        plt.scatter(ICs, ICg,s=10, label="IC detected", color='red', linewidth=1.0, zorder=1)
+        plt.scatter(TOs, TOg,s=10, label="TO detected", color='blue', linewidth=1.0, zorder=1)
+        plt.scatter(ogTOs, ogTOg, s=10,label="ogTO detected", color='pink', linewidth=1.0, zorder=1)
+        plt.scatter(ogICs, ogICg,s=10, label="ogIC detected", color='lightblue', linewidth=1.0, zorder=1)
 
         
 
