@@ -131,10 +131,11 @@ for filename in os.listdir(directory):
         plt.scatter(ICtime_old, IC, marker='o',s=10, label="IC from FSR", facecolors='none', edgecolors='red',linewidth=1.0, zorder=1)
         
 
+
+        plt.scatter(ogTOs, ogTOg, s=10,label="TO from IMU", color='pink', linewidth=1.0, zorder=1)
+        plt.scatter(ogICs, ogICg,s=10, label="IC from IMU", color='lightblue', linewidth=1.0, zorder=1)
         plt.scatter(ICs, ICg,s=10, label="IC detected", color='red', linewidth=1.0, zorder=1)
         plt.scatter(TOs, TOg,s=10, label="TO detected", color='blue', linewidth=1.0, zorder=1)
-        plt.scatter(ogTOs, ogTOg, s=10,label="ogTO detected", color='pink', linewidth=1.0, zorder=1)
-        plt.scatter(ogICs, ogICg,s=10, label="ogIC detected", color='lightblue', linewidth=1.0, zorder=1)
 
         
 
