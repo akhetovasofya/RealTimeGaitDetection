@@ -27,7 +27,9 @@ for filename in os.listdir(directory):
 
         if name[0] == "GRT03" :
             continue
-
+        
+        #if filename!="GRT08_vary_01.csv":
+        #    continue
         right_foot = 1
         if name[0] == "GRT07" or name[0] == "GRT09" or name[0] == "GRT05" or name[0] =="sofya" or  name[0] =="GRT02":
             right_foot=-1

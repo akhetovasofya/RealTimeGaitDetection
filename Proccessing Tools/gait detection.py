@@ -27,14 +27,12 @@ for filename in os.listdir(directory):
         with open(os.path.join(directory, filename), "r") as file:
             # Create a CSV reader
             imu = csv.reader(file)
-            print()
-            print()
-            print(filename)
+            
             # Skip the header row
             next(imu)
-            next(imu)
-            if filename != "GRT01_med_01.csv" and filename != "GRT01_slow_01.csv":
-                continue
+            #next(imu)
+            #if filename!="GRT04_vary_31.csv":
+            #    continue
             if name_split[0] == "GRT03":
                 continue
             right_foot = 1
@@ -42,6 +40,7 @@ for filename in os.listdir(directory):
                 right_foot=-1
             if name_split[0] == "GRT03" and name_split[-2]=="right":
                 right_foot=-1
+            print(filename)
             # I need to divide it into 2 sections, calibrations and then analysis
             callibration_step1 = []
             callibration_step2 = []
@@ -114,10 +113,10 @@ for filename in os.listdir(directory):
                 
                 #if index <200:
                 #    continue
-                if len(row)<9:
+                if not row[9]:
                     continue
-                #print(row)
-
+                #print("row[6]: ", row[6])
+                #print("row[9]: ", row[9])
                 current_point = float(row[6])*right_foot
                 #print(row)
                 current_time = float(row[9])
@@ -129,9 +128,7 @@ for filename in os.listdir(directory):
                 
                 callibration[step%3].append(current_point)
                 callibration_time[step%3].append(current_time)
-                print()
-                print("time: current_time: ", current_time, "; first_zero: ", first_zero, "; second_zero: ", second_zero, "; current_point: ", current_point, "; prev_point: ", prev_point)
-                print()
+
 
                 #recording swing and stance
                 #if 0 or sign change, then start recording.
@@ -145,35 +142,28 @@ for filename in os.listdir(directory):
                             
                             #print("SECOND ZERO")
                             
-                            #For debugging
-                            if len(total_time)!=0:
-                                if (calibrated):
-                                    print("1st: ", max(callibration[step%3])/(sum(pos_peak)/len(pos_peak)))
-                                    print("2nd: ", min(callibration[step%3])/(sum(TOpeak)/len(TOpeak)))
-                                    print("TOpeak: ", TOpeak)
-                                    print("3rd: ", elapsed_time/(sum(total_time)/len(total_time)))
-
                             if (not calibrated)or((max(callibration[step%3])/(sum(pos_peak)/len(pos_peak))>0.2) & (min(callibration[step%3])/(sum(TOpeak)/len(TOpeak))>0.2) & (elapsed_time/(sum(total_time)/len(total_time))>0.6)):
                                     #good trial so put it's values
-                                print("calib time: ", callibration_time[step%3])
-                                print("values: ", callibration[step%3] )
+                                #print()
+                                #print("calib time: ", callibration_time[step%3])
+                                #print("values: ", callibration[step%3] )
                                 pos_peak.append(max(callibration[step%3]))
                                 total_time.append(elapsed_time)
                                 if calibrated:
-                                    print(filename)
+                                    print("filename: ", filename)
                                     which_middle_index = callibration_time[step%3].index(minipeak[-1])
                                 else:
                                     which_middle_index = int(len(callibration[step%3])/3*2)
-                                print("which_middle_index: ", which_middle_index)
-                                print("value at index : ", callibration[step%3][which_middle_index])
-                                print("time at index : ", callibration_time[step%3][which_middle_index])
+                                #print("which_middle_index: ", which_middle_index)
+                                #print("value at index : ", callibration[step%3][which_middle_index])
+                                #print("time at index : ", callibration_time[step%3][which_middle_index])
                                 mid_peak_frame = callibration[step%3][0:which_middle_index]
                                 mid_peak_frame_time = callibration_time[step%3][0:which_middle_index]
                                 end_peak_frame = callibration[step%3][which_middle_index:-1]
                                 end_peak_frame_time = callibration_time[step%3][which_middle_index:-1]
 
-                                print("mid_peak_time_frame: ",mid_peak_frame )
-                                print("end_peak_time_frame: ", end_peak_frame)
+                                #print("mid_peak_time_frame: ",mid_peak_frame )
+                                #print("end_peak_time_frame: ", end_peak_frame)
 
                                 
                                 TOpeak_full.append(min(end_peak_frame))
@@ -183,32 +173,32 @@ for filename in os.listdir(directory):
                                 ICpeak_full.append(min(mid_peak_frame))
                                 ICpeak.append(min(mid_peak_frame))
                                 ICtime_full.append(mid_peak_frame_time[mid_peak_frame.index(ICpeak[-1])])
-                                print("ICtime_full: ", ICtime_full[-1])
+                                #print("ICtime_full: ", ICtime_full[-1])
                                 ICtime.append(mid_peak_frame_time[mid_peak_frame.index(ICpeak[-1])])
                                 standing_time.append(TOtime[-1] - ICtime[-1])
 
-                                print()
-                                print("NEW AVERAGES: ")
-                                print("TO: ",sum(TOpeak)/len(TOpeak) )
-                                print(TOpeak)
-                                print(TOtime)
-                                print("IC: ",sum(ICpeak)/len(ICpeak) )
-                                print(ICpeak)
-                                print(ICtime)
+                                #print()
+                                #print("NEW AVERAGES: ")
+                                #print("TO: ",sum(TOpeak)/len(TOpeak) )
+                                #print(TOpeak)
+                                #print(TOtime)
+                                #print("IC: ",sum(ICpeak)/len(ICpeak) )
+                                #print(ICpeak)
+                                #print(ICtime)
                                 if calibrated&(len(ICs)!=0)&(len(TOs)!=0):
                                     
-                                    print("IC Delay: ", ICdelay)
+                                    #print("IC Delay: ", ICdelay)
                                     if callibration_time[step%3][callibration[step%3].index(ICpeak[-1])]-ogICs[-1]!=0:
                                         ICdelay.append(callibration_time[step%3][callibration[step%3].index(ICpeak[-1])]-ogICs[-1])
                                         ICdelay_full.append(ICdelay[-1])
-                                    print("IC Delay appended : ", ICdelay[-1])
+                                    #print("IC Delay appended : ", ICdelay[-1])
                                     if goodTO:
-                                        print()
-                                        print("TO Delay: ", TOdelay)
+                                        #print()
+                                        #print("TO Delay: ", TOdelay)
                                         if callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-ogTOs[-1]!=0:
                                             TOdelay.append(callibration_time[step%3][callibration[step%3].index(TOpeak[-1])]-ogTOs[-1])
                                             TOdelay_full.append(TOdelay[-1])
-                                        print("TO Delay appended : ", TOdelay[-1])
+                                        #print("TO Delay appended : ", TOdelay[-1])
                                     
                                 calibrated = True
                                 step+=1 #done with recording
@@ -234,10 +224,10 @@ for filename in os.listdir(directory):
                         first_zero = False
                         second_zero = True# got to 2nd but we keep recording
                         second_zero_time = current_time 
-                        print("second_zero_time: ", second_zero_time)
-                        print("raw values: ", prev_point, " and " ,current_point)
-                        print("1st: ", (abs(prev_point)+abs(current_point)))
-                        print("2nd: ", abs(prev_point+current_point))
+                        #print("second_zero_time: ", second_zero_time)
+                        #print("raw values: ", prev_point, " and " ,current_point)
+                        #print("1st: ", (abs(prev_point)+abs(current_point)))
+                        #print("2nd: ", abs(prev_point+current_point))
                     else:
                         first_zero = True
                         #print("first_zero CHANGED: ", first_zero)
@@ -245,6 +235,13 @@ for filename in os.listdir(directory):
                 #THIS IS WHERE DECISIONS HAPPENED
                 if (calibrated):
                     #peak
+                    #print()
+                    print("STAGE: ")
+                    print("at_max_peak: ", at_max_peak, "; toes_off: ", toes_off, "; heel_strike: ",  heel_strike, "; at_mini_peak: ", at_mini_peak, "; approach_low_toe; ",  approach_low_toe)
+                    print()
+                    print("current_point: ", current_point)
+                    print("current_time: ", current_time)
+                    print("other half: ", (sum(TOpeak)/len(TOpeak)*0.7))
                     #at max peak
                     if ((current_point>sum(pos_peak)/len(pos_peak)*0.7)&(not at_max_peak)):
                         at_max_peak = True
@@ -257,7 +254,7 @@ for filename in os.listdir(directory):
                         #print("AT PEAK")
                     #what happend is threshold is bad for currernt
                     #at heel strike
-                    elif (current_point<(sum(ICpeak)/len(ICpeak)*0.8) or (((current_point - prev_point)>5 and (current_point-second_prev_point)>0) and current_point<0))&at_max_peak:
+                    elif (current_point<(sum(ICpeak)/len(ICpeak)*0.7) or (((current_point - prev_point)>5 and (current_point-second_prev_point)>0) and current_point<0))&at_max_peak:
                         
                         if len(ICs)==0 or len(ICdelay)==0:
                             #print("AT HEEL STRIKE")
@@ -288,8 +285,8 @@ for filename in os.listdir(directory):
 
                     #mini peak (having a time contraint for noisy data)
                     #
-                    elif (current_point>(sum(TOpeak)/len(TOpeak)*0.5))&heel_strike:
-                        #print("TIMES AT MINI PEAK: ", standing_time )
+                    
+                    elif (current_point>(sum(TOpeak)/len(TOpeak)*0.7))&heel_strike:
                         if (sum(standing_time)/len(standing_time)*0.3<(current_time-time_from_IC)):
                             heel_strike = False
                             at_mini_peak = True
@@ -364,7 +361,6 @@ for filename in os.listdir(directory):
         print("ICs: ", len(ICs))
         print("TOs: ", len(TOs))
         print("ogTOs: ", len(ogTOs))
-        #print("minipeak: ", minipeak)
         print()
         print("ICdelay: ",ICdelay)
         print("TOdelay: ", TOdelay)
