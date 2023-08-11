@@ -34,8 +34,8 @@ for filename in os.listdir(directory):
             next(imu)
             
             #Doing only this file
-            #if filename!="GRT05_slow_31.csv":
-            #    continue
+            if filename!="GRT05_slow_31.csv":
+                continue
 
             #Skipping some files
             if name_split[0] == "GRT03":
@@ -116,12 +116,7 @@ for filename in os.listdir(directory):
                     if len(peaks_value)>=i:
                         average_peak = sum(peaks_value[len(peaks_value)-i:])/i
                         average_time = sum(all_step_time[len(all_step_time)-i:])/i
-                #print()
-                #print("avg peak: ", average_peak)
-                #print("avg time: ", average_time)
-                #print("current_point: ", current_point)
-                #print("first_peak: ", first_peak)
-                #print()
+
                 if current_point>average_peak*peaks_ratio:
                     
                     #Incase it is too short due to noise
@@ -135,9 +130,11 @@ for filename in os.listdir(directory):
                         #the logic of finding where TO and IC should've been is through getting local minimums and taking the first one for IC and last one for TO
                         #the logic for first minimum to be IC is because that should be the initial change thus would be the first drastic minimum. After that, there is probably a bit of noise.
                         #The logic for the last minimum for TO is because once toes are lifted it will become positive so the most reliable minimum is probably going to be the last one
-                        local_mins_index = argrelextrema(step_values, np.less)
+                        local_mins_index = argrelextrema(np.array(step_values), np.less)[0]
                         shouldveTO_value.append(step_values[local_mins_index[-1]]) #TO where it should've been
                         shouldveIC_value.append(step_values[local_mins_index[0]]) #IC where it should've been
+                        shouldveTO_time.append(step_time[local_mins_index[-1]]) #TO where it should've been
+                        shouldveIC_time.append(step_time[local_mins_index[0]]) #IC where it should've been
                         #TOdelay.append(detectedTO[-1]-shouldveTO[-1])
                         #ICdelay.append(detectedIC[-1]-shouldveIC[-1])
                         all_step_time.append(step_time[-1]-step_time[0])
@@ -219,23 +216,23 @@ for filename in os.listdir(directory):
                 if i<len(detectedIC_value):
                     printing_list[2] = detectedIC_value[i]
                 if i<len(detectedIC_time):
-                    printing_list[2] = detectedIC_time[i]
+                    printing_list[3] = detectedIC_time[i]
                 if i <len(detectedTO_value):
-                    printing_list[3] = detectedTO_value[i]
+                    printing_list[4] = detectedTO_value[i]
                 if i <len(detectedTO_time):
-                    printing_list[3] = detectedTO_time[i]
+                    printing_list[5] = detectedTO_time[i]
                 if i <len(shouldveIC_value):
-                    printing_list[4] = shouldveIC_value[i]
+                    printing_list[6] = shouldveIC_value[i]
                 if i <len(shouldveIC_time):
-                    printing_list[4] = shouldveIC_time[i]
+                    printing_list[7] = shouldveIC_time[i]
                 if i<len(shouldveTO_value):
-                    printing_list[5] = shouldveTO_value[i]
+                    printing_list[8] = shouldveTO_value[i]
                 if i<len(shouldveTO_time):
-                    printing_list[5] = shouldveTO_time[i]
+                    printing_list[9] = shouldveTO_time[i]
                 if i <len(ICdelay):
-                    printing_list[6] = ICdelay[i]
+                    printing_list[10] = ICdelay[i]
                 if i <len(TOdelay):
-                    printing_list[7] = TOdelay[i]
+                    printing_list[11] = TOdelay[i]
                 writer.writerow(printing_list)
 
         #break
