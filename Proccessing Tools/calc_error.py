@@ -22,6 +22,19 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
     overallTOvary = []
     overallICvary = []
 
+    #plotting delays
+    fig, axs = plt.subplots(2, 4)   
+    axs[0, 0].set_title('TO Delay in Slow')
+    axs[0, 1].set_title('TO Delay in Medium')
+    axs[0, 2].set_title('TO Delay in Fast')
+    axs[0, 3].set_title('TO Delay in Vary')
+
+    axs[1, 0].set_title('IC Delay in Slow')
+    axs[1, 1].set_title('IC Delay in Medium')
+    axs[1, 2].set_title('IC Delay in Fast')
+    axs[1, 3].set_title('IC Delay in Vary')
+
+
     for filename in os.listdir(directory):
         # Check if the file is a .log file
 
@@ -31,7 +44,6 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             print(filename)
             if name[0] == "GRT03":
                 continue
-
             imu = pd.read_csv(os.path.join(directory, filename))
             ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
             detected = pd.read_csv(os.path.join(directory_detected, filename.split('.csv')[0]+ "_detected.csv"))
@@ -143,21 +155,38 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             if name[1] == "slow":
                 overallICslow.append(sum(ICerror)/len(ICerror))
                 overallTOslow.append(sum(TOerror)/len(TOerror))
+                speed=0
             elif name[1] == "med":
                 overallICmed.append(sum(ICerror)/len(ICerror))
                 overallTOmed.append(sum(TOerror)/len(TOerror))
+                speed = 1
             elif name[1] == "fast":
                 overallICfast.append(sum(ICerror)/len(ICerror))
                 overallTOfast.append(sum(TOerror)/len(TOerror))
+                speed = 2
             elif name[1] == "vary":
                 overallICvary.append(sum(ICerror)/len(ICerror))
                 overallTOvary.append(sum(TOerror)/len(TOerror))
+                speed = 3
             writer.writerow([filename, sum(TOerror)/len(TOerror), sum(ICerror)/len(ICerror),TOmisses, ICmisses,(sum(TOs_truth)-sum(actual_TO_time_detected))/len(actual_TO_time_detected), (sum(ICs_truth)-sum(actual_IC_time_detected))/len(actual_IC_time_detected)])
             writer.writerow(TO_value_detected)
             writer.writerow(TO_time_detected)
             writer.writerow(IC_value_detected)
             writer.writerow(IC_time_detected)
+            writer.writerow(actual_TO_time_detected)
+            writer.writerow(actual_IC_time_detected)
             writer.writerow([])
+            writer.writerow(TOs_truth)
+            writer.writerow(ICs_truth)
+            writer.writerow([])
+            writer.writerow([])
+            print("TOs_truth: ", TOs_truth)
+            print("actual_TO_time_detected: ", actual_TO_time_detected)
+            to_plot = np.subtract(TOs_truth, actual_TO_time_detected)
+            ic_plot = np.subtract(ICs_truth, actual_IC_time_detected)
+            axs[0,speed].plot(to_plot, label=name[0])
+            axs[1,speed].plot(ic_plot, label=name[0])
+
     writer.writerow(["overallTOslow: ", "overallICslow: ", "overallTOmed: ", "overallICmed: ", "overallTOfast: ", "overallICfast: ", "overallTOvary: ", "overallICvary: "])
     writer.writerow([sum(overallTOslow)/len(overallTOslow), sum(overallICslow)/len(overallICslow),sum(overallTOmed)/len(overallTOmed), sum(overallICmed)/len(overallICmed), sum(overallTOfast)/len(overallTOfast), sum(overallICfast)/len(overallICfast), sum(overallTOvary)/len(overallTOvary), sum(overallICvary)/len(overallICvary) ])
     writer.writerow([])
@@ -169,9 +198,15 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
 
 
 
+    ####################finishing plotting
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    plt.ylabel("Time Differance (ms)")
+    plt.title("TO Truth Delay")
+    plt.show()
 
     ################################################################
     ####################Plotting error##############################
+    
     plt.figure(figsize=(8, 5))
     plt.rcParams.update({'font.size': 20})
     plt.scatter( [0]*len(overallTOslow), overallTOslow, label="Slow",color='green', linewidth=1.0, zorder=1)

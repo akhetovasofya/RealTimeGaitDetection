@@ -28,8 +28,8 @@ for filename in os.listdir(directory):
         if name[0] == "GRT03" :
             continue
         
-        #if filename!="GRT08_vary_01.csv":
-        #    continue
+        if filename!="GRT05_slow_31.csv":
+            continue
         right_foot = 1
         if name[0] == "GRT07" or name[0] == "GRT09" or name[0] == "GRT05" or name[0] =="sofya" or  name[0] =="GRT02":
             right_foot=-1
@@ -77,8 +77,8 @@ for filename in os.listdir(directory):
         ogTOg_old = ogTOg_old.values.tolist()
         ogICs_old = detected[detected.columns[6]]
         ogICs_old = ogICs_old.values.tolist()
-        ogICg_old = detected[detected.columns[7]]
-        ogICg_old = ogICg_old.values.tolist()
+        #ogICg_old = detected[detected.columns[7]]
+        #ogICg_old = ogICg_old.values.tolist()
 
         
         
@@ -111,7 +111,7 @@ for filename in os.listdir(directory):
         for i in range(0, len(ogICs_old)):
             if ogICs_old[i] == ogICs_old[i]:
                 ogICs.append(ogICs_old[i]) # deleting NaNs
-                ogICg.append(ogICg_old[i]) # deleting NaNs
+                #ogICg.append(ogICg_old[i]) # deleting NaNs
 
         for i in range(0, len(TOtime)):
             if TOtime[i] != TOtime[i]:

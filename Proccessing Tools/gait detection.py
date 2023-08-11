@@ -31,8 +31,8 @@ for filename in os.listdir(directory):
             # Skip the header row
             next(imu)
             #next(imu)
-            #if filename!="GRT04_vary_31.csv":
-            #    continue
+            if filename!="GRT05_slow_31.csv":
+                continue
             if name_split[0] == "GRT03":
                 continue
             right_foot = 1
@@ -147,6 +147,7 @@ for filename in os.listdir(directory):
                                 #print()
                                 #print("calib time: ", callibration_time[step%3])
                                 #print("values: ", callibration[step%3] )
+                                print("GOT IT")
                                 pos_peak.append(max(callibration[step%3]))
                                 total_time.append(elapsed_time)
                                 if calibrated:
@@ -154,17 +155,18 @@ for filename in os.listdir(directory):
                                     which_middle_index = callibration_time[step%3].index(minipeak[-1])
                                 else:
                                     which_middle_index = int(len(callibration[step%3])/3*2)
-                                #print("which_middle_index: ", which_middle_index)
-                                #print("value at index : ", callibration[step%3][which_middle_index])
-                                #print("time at index : ", callibration_time[step%3][which_middle_index])
+                                print("time from: ", callibration_time[step%3][0], " to: ", callibration_time[step%3][-1] )
+                                print("which_middle_index: ", which_middle_index)
+                                print("value at index : ", callibration[step%3][which_middle_index])
+                                print("time at index : ", callibration_time[step%3][which_middle_index])
                                 mid_peak_frame = callibration[step%3][0:which_middle_index]
                                 mid_peak_frame_time = callibration_time[step%3][0:which_middle_index]
                                 end_peak_frame = callibration[step%3][which_middle_index:-1]
                                 end_peak_frame_time = callibration_time[step%3][which_middle_index:-1]
 
-                                #print("mid_peak_time_frame: ",mid_peak_frame )
-                                #print("end_peak_time_frame: ", end_peak_frame)
-
+                                print("mid_peak_time_frame: ",mid_peak_frame )
+                                print("end_peak_time_frame: ", end_peak_frame)
+                                
                                 
                                 TOpeak_full.append(min(end_peak_frame))
                                 TOpeak.append(min(end_peak_frame))
@@ -185,6 +187,7 @@ for filename in os.listdir(directory):
                                 #print("IC: ",sum(ICpeak)/len(ICpeak) )
                                 #print(ICpeak)
                                 #print(ICtime)
+                                print("GOT IT 2")
                                 if calibrated&(len(ICs)!=0)&(len(TOs)!=0):
                                     
                                     #print("IC Delay: ", ICdelay)
@@ -204,6 +207,7 @@ for filename in os.listdir(directory):
                                 step+=1 #done with recording
 
                                 #taking out old
+                                print("GOT IT 3")
                                 if len(total_time)>3:
                                     pos_peak.pop(0)
                                     TOpeak.pop(0)
@@ -217,12 +221,22 @@ for filename in os.listdir(directory):
                                 if len(TOdelay)>3:
                                     TOdelay.pop(0)
                                 callibration[step%3].clear()
+                                print("CLEARED")
                                 callibration_time[step%3].clear()
+                                print(callibration_time[step%3])
                                 #print("cleared")
                                 continue
-                    if (((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point)))&first_zero):
+                    if ( calibrated):
+                        print()
+                        print(callibration_time[step%3])
+                        print("ponts of 1st: ", current_time, " and ", callibration_time[(step)%3][0])
+                        print("1st: ", (current_time-callibration_time[step%3][0]))
+                        print("2nd: ", 0.2*sum(total_time)/len(total_time))
+                        print()
+                    if ((current_point==0.0)|((abs(prev_point)+abs(current_point))>abs(prev_point+current_point)))&first_zero&((not calibrated)or (elapsed_time/(sum(total_time)/len(total_time))>0.1)):
                         first_zero = False
                         second_zero = True# got to 2nd but we keep recording
+                        print("GOT IN MID")
                         second_zero_time = current_time 
                         #print("second_zero_time: ", second_zero_time)
                         #print("raw values: ", prev_point, " and " ,current_point)
