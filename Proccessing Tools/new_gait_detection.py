@@ -8,6 +8,10 @@ import matplotlib.pyplot as plt
 import queue
 import global_variables
 
+#This function will give you the index of the IC event when you give it a whole step
+
+#It does it through the logic of first detecting a significant negative slope. When we have that, we know that we are "falling" from the peak.
+#Then the first moment we stop falling and are in the negatives, we reached the "stoppped falling".
 def finding_IC(values):
     falling = False #Whether we started to fall
     for i in range(2, len(values)):
@@ -18,12 +22,25 @@ def finding_IC(values):
     print("Error: Couldn't find should've IC")
     return -1
 
+#This function will give you the index of the IC event when you give it a whole step
+
+#The logic of it is to record the lowest point right where it just had a negative slope and now the next point has a positive slope
 def finding_TO(values):
     fall_down_from_peak = False
     TOindex = -1
     TOvalue = 0
+    print("in the TO function")
     for i in range(round(len(values)*0.5)+2, len(values)):
-        if values[i-1]-values[i-2]< 0 and values[i]-values[i-1]>0 and values[i-1]<TOvalue and values[i-1]<0:
+        print()
+        print("i: ", i)
+        print("time: ", )
+        print("1: ",values[i-1]-values[i-2] , " <0")
+        print("2: ",values[i]-values[i-1], " >0")
+        print("3: ",values[i-1], " and <",  TOvalue)
+        print("4: ",values[i-1] , " <0")
+        print("1: ", values[i], " >0")
+        print("2: ", fall_down_from_peak)
+        if values[i-1]-values[i-2]<= 0 and values[i]-values[i-1]>=0 and values[i-1]<TOvalue and values[i-1]<0:
             TOvalue = values[i-1]
             TOindex = i-1
             fall_down_from_peak = True
@@ -50,7 +67,7 @@ for filename in os.listdir(directory):
             next(imu)
             
             #Doing only this file
-            #if filename!="GRT05_slow_31.csv":
+            #if filename!="GRT01_slow_01.csv":
             #    continue
 
             #Skipping some files
