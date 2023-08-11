@@ -34,8 +34,8 @@ for filename in os.listdir(directory):
             continue
         
         #only analysing some files
-        if filename!="GRT05_slow_31.csv":
-            continue
+        #if filename!="GRT05_slow_31.csv":
+        #    continue
 
         #Flipping values for all the right legs as the imu was flipped
         right_foot = 1

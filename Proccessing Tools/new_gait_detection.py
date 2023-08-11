@@ -1,21 +1,21 @@
-#Thoughts:
-# 1. put calibration protection to make sure calibration step was good
-
-
-
-
+#Written by Sofya Akhetova
 import pandas as pd
 import os
 import csv
 import numpy as np
 from scipy.signal import argrelextrema
-
 import matplotlib.pyplot as plt
 import queue
-
-
-
 import global_variables
+
+def finding_IC(values):
+    falling = False #Whether we started to fall
+    for i in range(2, len(values)):
+        if values[i]-values[i-1]<-10:
+            falling = True
+        if values[i]-values[i-1]>0 and values[i-1]-values[i-2]<0 and values[i]<0 and values[i-1]<0 and values[i-2]<0 and falling:
+            return i-1
+
 directory = global_variables.directory
 directory_for_saving = global_variables.directory_detected
 directory_for_saving_file_truth = global_variables.directory_file_truth
@@ -34,8 +34,8 @@ for filename in os.listdir(directory):
             next(imu)
             
             #Doing only this file
-            if filename!="GRT05_slow_31.csv":
-                continue
+            #if filename!="GRT05_slow_31.csv":
+            #    continue
 
             #Skipping some files
             if name_split[0] == "GRT03":
@@ -131,10 +131,11 @@ for filename in os.listdir(directory):
                         #the logic for first minimum to be IC is because that should be the initial change thus would be the first drastic minimum. After that, there is probably a bit of noise.
                         #The logic for the last minimum for TO is because once toes are lifted it will become positive so the most reliable minimum is probably going to be the last one
                         local_mins_index = argrelextrema(np.array(step_values), np.less)[0]
+                        IC_index = finding_IC(step_values)
                         shouldveTO_value.append(step_values[local_mins_index[-1]]) #TO where it should've been
-                        shouldveIC_value.append(step_values[local_mins_index[0]]) #IC where it should've been
+                        shouldveIC_value.append(step_values[IC_index]) #IC where it should've been
                         shouldveTO_time.append(step_time[local_mins_index[-1]]) #TO where it should've been
-                        shouldveIC_time.append(step_time[local_mins_index[0]]) #IC where it should've been
+                        shouldveIC_time.append(step_time[IC_index]) #IC where it should've been
                         #TOdelay.append(detectedTO[-1]-shouldveTO[-1])
                         #ICdelay.append(detectedIC[-1]-shouldveIC[-1])
                         all_step_time.append(step_time[-1]-step_time[0])
