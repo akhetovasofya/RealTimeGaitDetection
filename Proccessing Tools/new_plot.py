@@ -34,8 +34,8 @@ for filename in os.listdir(directory):
             continue
         
         #only analysing some files
-        if filename!="GRT01_slow_01.csv":
-            continue
+        #if filename!="GRT01_slow_01.csv":
+        #    continue
 
         #Flipping values for all the right legs as the imu was flipped
         right_foot = 1
@@ -81,6 +81,7 @@ for filename in os.listdir(directory):
         TO_value_detected = TO_value_detected.values.tolist()
         TO_time_detected = detected[detected.columns[5]]
         TO_time_detected = TO_time_detected.values.tolist()
+        
 
         #Should've TO and IC
         shoulve_IC_value_detected = detected[detected.columns[6]]
@@ -91,6 +92,16 @@ for filename in os.listdir(directory):
         shoulve_TO_value_detected = shoulve_TO_value_detected.values.tolist()
         shoulve_TO_time_detected = detected[detected.columns[9]]
         shoulve_TO_time_detected = shoulve_TO_time_detected.values.tolist()
+
+        #Initially Detected TO and IC
+        init_IC_value_detected = detected[detected.columns[12]]
+        init_IC_value_detected = init_IC_value_detected.values.tolist()
+        init_IC_time_detected = detected[detected.columns[13]]
+        init_IC_time_detected = init_IC_time_detected.values.tolist()
+        init_TO_value_detected = detected[detected.columns[14]]
+        init_TO_value_detected = init_TO_value_detected.values.tolist()
+        init_TO_time_detected = detected[detected.columns[15]]
+        init_TO_time_detected = init_TO_time_detected.values.tolist()
 
         #deleting unused
         checked_TO_GroundTruth = []
@@ -105,6 +116,10 @@ for filename in os.listdir(directory):
         checked_shoulve_IC_time_detected = []
         checked_shoulve_TO_value_detected = []
         checked_shoulve_TO_time_detected = []
+        checked_init_IC_value_detected = []
+        checked_init_IC_time_detected = []
+        checked_init_TO_value_detected = []
+        checked_init_TO_time_detected = []
 
         #checking TO for Ground Truth
         for i in range(0, len(TO_GroundTruth)):
@@ -156,7 +171,22 @@ for filename in os.listdir(directory):
             if shoulve_TO_time_detected[i] == shoulve_TO_time_detected[i]:
                 checked_shoulve_TO_time_detected.append(shoulve_TO_time_detected[i]) # deleting NaNs
 
+        #checking for initally detected IC
+        for i in range(0, len(init_IC_value_detected)):
+            if init_IC_value_detected[i] == init_IC_value_detected[i]:
+                checked_init_IC_value_detected.append(init_IC_value_detected[i]) # deleting NaNs
+        for i in range(0, len(init_IC_time_detected)):
+            if init_IC_time_detected[i] == init_IC_time_detected[i]:
+                checked_init_IC_time_detected.append(init_IC_time_detected[i]) # deleting NaNs
         
+        #checking for initally detected TO
+        for i in range(0, len(init_TO_value_detected)):
+            if init_TO_value_detected[i] == init_TO_value_detected[i]:
+                checked_init_TO_value_detected.append(init_TO_value_detected[i]) # deleting NaNs
+        for i in range(0, len(init_TO_time_detected)):
+            if init_TO_time_detected[i] == init_TO_time_detected[i]:
+                checked_init_TO_time_detected.append(init_TO_time_detected[i]) # deleting NaNs
+
         
         if len(checked_peaks_values_detected)==0|len(checked_peaks_time_detected)==0|len(checked_shoulve_IC_value_detected)==0|len(checked_shoulve_IC_time_detected)==0|len(checked_shoulve_TO_value_detected)==0|len(checked_shoulve_TO_time_detected)==0:
             print("ERRROR IN DETECTED")
@@ -171,17 +201,13 @@ for filename in os.listdir(directory):
         plt.scatter(checked_IC_GroundTruth, IC_GroundTruth_plotting, marker='o',s=10, label="IC from FSR", facecolors='none', edgecolors='red',linewidth=1.0, zorder=1)
         
         #Detected
-        print("shoulve_TO_time_detected: ", len(shoulve_TO_time_detected))
-        print("shoulve_IC_time_detected: ", len(shoulve_IC_time_detected))
-        print("checked_shoulve_IC_time_detected: ", len(checked_shoulve_IC_time_detected))
-        print("checked_shoulve_IC_value_detected: ", len(checked_shoulve_IC_value_detected))
-        print("checked_shoulve_TO_time_detected: ", len(checked_shoulve_TO_time_detected))
-        print("checked_shoulve_TO_value_detected: ", len(checked_shoulve_TO_value_detected))
         plt.scatter(checked_peaks_time_detected, checked_peaks_values_detected, s=10,label="Peaks", color='green', linewidth=1.0, zorder=1)
         plt.scatter(checked_shoulve_IC_time_detected, checked_shoulve_IC_value_detected, s=10,label="Should've IC", color='red', linewidth=0.7, zorder=1)
         plt.scatter(checked_shoulve_TO_time_detected, checked_shoulve_TO_value_detected, s=10,label="Should've TO", color='blue', linewidth=0.7, zorder=1)
         plt.scatter(checked_IC_time_detected, checked_IC_value_detected, s=10,label="Detected IC", color='pink', linewidth=0.7, zorder=1)
-        plt.scatter(checked_TO_time_detected, checked_TO_value_detected, s=10,label="Detected TO", color='cyan', linewidth=0.7, zorder=1)
+        plt.scatter(checked_TO_time_detected, checked_TO_value_detected, s=10,label="DetectedTO", color='cyan', linewidth=0.7, zorder=1)
+        plt.scatter(checked_init_IC_time_detected, checked_init_IC_value_detected, facecolors='none',s=10,label="Intially Detected IC", color='pink', linewidth=0.7, zorder=1)
+        plt.scatter(checked_init_TO_time_detected, checked_init_TO_value_detected, facecolors='none',s=10,label="Intially Detected TO", color='cyan', linewidth=0.7, zorder=1)
 
 
         # Add labels and legend

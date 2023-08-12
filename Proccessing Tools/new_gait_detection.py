@@ -9,7 +9,6 @@ import queue
 import global_variables
 
 #This function will give you the index of the IC event when you give it a whole step
-
 #It does it through the logic of first detecting a significant negative slope. When we have that, we know that we are "falling" from the peak.
 #Then the first moment we stop falling and are in the negatives, we reached the "stoppped falling".
 def finding_IC(values):
@@ -22,8 +21,8 @@ def finding_IC(values):
     print("Error: Couldn't find should've IC")
     return -1
 
-#This function will give you the index of the IC event when you give it a whole step
 
+#This function will give you the index of the IC event when you give it a whole step
 #The logic of it is to record the lowest point right where it just had a negative slope and now the next point has a positive slope
 def finding_TO(values):
     fall_down_from_peak = False
@@ -39,9 +38,13 @@ def finding_TO(values):
     print("Error: Couldn't find should've TO")
     return TOindex
 
+
+#Getting directories of all the files
 directory = global_variables.directory
 directory_for_saving = global_variables.directory_detected
 directory_for_saving_file_truth = global_variables.directory_file_truth
+
+#opening the directories
 for filename in os.listdir(directory):
     
     if filename.endswith(".csv"):
@@ -50,6 +53,7 @@ for filename in os.listdir(directory):
         if name_split[-1]=="truth":
             continue
         with open(os.path.join(directory, filename), "r") as file:
+
             # Create a CSV reader
             imu = csv.reader(file)
             
@@ -57,8 +61,8 @@ for filename in os.listdir(directory):
             next(imu)
             
             #Doing only this file
-            if filename!="GRT01_slow_01.csv":
-                continue
+            #if filename!="GRT01_slow_01.csv":
+            #    continue
 
             #Skipping some files
             if name_split[0] == "GRT03":
@@ -78,12 +82,16 @@ for filename in os.listdir(directory):
             #All recorded values
             peaks_value = [] #max peak
             peaks_time = [] #max peak
-            detectedTO_value = [] #TO that is our algo's decision
-            detectedIC_value = [] #IC that is our algo's decision
+            initial_detectedTO_value = [] #TO that is initially detected
+            initial_detectedIC_value = [] #IC that is initially detected
+            final_detectedTO_value = [] #TO that algo detected
+            final_detectedIC_value = [] #IC that algo detected
             shouldveTO_value = [] #TO where it should've been
             shouldveIC_value = [] #IC where it should've been
-            detectedTO_time = [] #TO that is our algo's decision
-            detectedIC_time = [] #IC that is our algo's decision
+            initial_detectedTO_time = [] #TO that is initially detected
+            initial_detectedIC_time = [] #IC that is initially detected
+            final_detectedTO_time = [] #TO that algo detected
+            final_detectedIC_time = [] #IC that algo detected
             shouldveTO_time = [] #TO where it should've been
             shouldveIC_time = [] #IC where it should've been
             TOdelay = [] #delay of TO (detectedTO-shouldveTO)
@@ -97,6 +105,7 @@ for filename in os.listdir(directory):
             IC_ratio = 0.7
             TO_ratio = 0.7
             standing_time_ratio = 0.7
+            precautionary_slop = 10
 
             #How many last steps to use
             steps = 3
@@ -108,6 +117,8 @@ for filename in os.listdir(directory):
             average_TO = -1
             average_IC = -1
             average_standing_time = 500 #in ms
+            average_TOdelay = 0
+            average_ICdelay = 0
 
             #setting previous
             prev_point = 0
@@ -122,7 +133,9 @@ for filename in os.listdir(directory):
             #State Machine Terms
             first_peak = False
             IChappened = False  
-            TOhappened = False          
+            TOhappened = False 
+            initialIC = False
+            initialTO = False         
 
             # Iterate through each row of data
             for index, row in enumerate(imu):
@@ -153,6 +166,10 @@ for filename in os.listdir(directory):
                         average_TO = sum(shouldveTO_value[len(shouldveTO_value)-i:])/i
                     if len(standing_time)>=i:
                         average_standing_time = sum(standing_time[len(standing_time)-i:])/i
+                    if len(ICdelay)>=i:
+                        average_ICdelay = sum(ICdelay[len(ICdelay)-i:])/i
+                    if len(TOdelay)>=i:
+                        average_TOdelay = sum(TOdelay[len(TOdelay)-i:])/i
 
 
                 if current_point>average_peak*peaks_ratio:
@@ -163,6 +180,8 @@ for filename in os.listdir(directory):
                         #Resetting State Machine values
                         IChappened = False
                         TOhappened = False
+                        initialIC = False
+                        initialTO = False
                         
                         #Recording some values
                         peaks_value.append(max(step_values)) #finding the max
@@ -177,14 +196,20 @@ for filename in os.listdir(directory):
                         shouldveIC_time.append(step_time[IC_index]) #IC where it should've been
 
                         #If TO and IC empty, that means it's their first step so we need to append the first should've value
-                        if not detectedTO_value:
-                            detectedTO_value.append(shouldveTO_value[-1])
-                            detectedTO_time.append(shouldveTO_time[-1])
-                        if not detectedIC_value:
-                            detectedIC_value.append(shouldveIC_value[-1])
-                            detectedIC_time.append(shouldveIC_time[-1])
-                        TOdelay.append(shouldveTO_time[-1]-detectedTO_time[-1])
-                        ICdelay.append(shouldveIC_time[-1]-detectedIC_time[-1])
+                        if not initial_detectedTO_value:
+                            initial_detectedTO_value.append(shouldveTO_value[-1])
+                            initial_detectedTO_time.append(shouldveTO_time[-1])
+                        if not initial_detectedIC_value:
+                            initial_detectedIC_value.append(shouldveIC_value[-1])
+                            initial_detectedIC_time.append(shouldveIC_time[-1])
+
+                        #I only want to append if the delay is positive as that means detected happened before should've which means I can delay the event
+                        #If it's negetive, it means that detected happened after should've thus I can't delay.
+                        if shouldveTO_time[-1]-initial_detectedTO_time[-1] > 0:
+                            TOdelay.append(shouldveTO_time[-1]-initial_detectedTO_time[-1])
+                        if shouldveIC_time[-1]-initial_detectedIC_time[-1] > 0:
+                            ICdelay.append(shouldveIC_time[-1]-initial_detectedIC_time[-1])
+
                         all_step_time.append(step_time[-1]-step_time[0])
                         standing_time.append(shouldveTO_time[-1] - shouldveIC_time[-1])
 
@@ -195,17 +220,58 @@ for filename in os.listdir(directory):
                     #Only do it once
                     first_peak = True
 
-                #checking whether calibrated, whether IC has not happened in the step, and whether this point is bellow our IC threshold
-                elif average_IC!=-1 and not IChappened and current_point < IC_ratio*average_IC:
-                    IChappened = True
-                    detectedIC_value.append(current_point)
-                    detectedIC_time.append(current_time)
+                # Left portion is checking whether calibrated, whether IC has not happened in the step, and whether this point is bellow our IC threshold
+                # Right is a IC precaution that if the slope is very large, we call the event
+                elif not IChappened and average_IC!=-1 and(( current_point < IC_ratio*average_IC) or ((current_point-prev_point)>precautionary_slop) and current_point<0):
 
-                #checking whether calibrated, whether TO has not happend but IC did in the step, and whether the timing bigged than average standing time
-                elif average_TO!=-1 and not TOhappened and IChappened and current_point < TO_ratio*average_TO and (current_time-detectedIC_time[-1])>average_standing_time*standing_time_ratio:
-                    TOhappened = True
-                    detectedTO_value.append(current_point)
-                    detectedTO_time.append(current_time)
+                    #safety conditions has been triggered
+                    if (current_point-prev_point)>precautionary_slop:
+                        if not initialIC:
+                            initialIC = True
+                            initial_detectedIC_value.append(current_point)
+                            initial_detectedIC_time.append(current_time)
+                        if not IChappened:
+                            IChappened = True
+                            final_detectedIC_value.append(current_point)
+                            final_detectedIC_time.append(current_time)
+
+                    #detecteding the first 
+                    elif not initialIC:
+                        initialIC = True
+                        initial_detectedIC_value.append(current_point)
+                        initial_detectedIC_time.append(current_time)
+
+                    elif not IChappened and initialIC and (current_time-initial_detectedIC_time[-1])>=average_ICdelay:
+                        IChappened = True
+                        final_detectedIC_value.append(current_point)
+                        final_detectedIC_time.append(current_time)
+
+                #Left portion is checking whether calibrated, whether TO has not happend but IC did in the step, and whether the timing bigged than average standing time
+                # Right is a TO precaution that if the slope is very large, we call the event
+                elif not TOhappened and IChappened and (current_time-initial_detectedIC_time[-1])>average_standing_time*standing_time_ratio and average_TO!=-1 and ((current_point < TO_ratio*average_TO) or ((current_point-prev_point)>precautionary_slop and current_point<0)):
+                    
+                    #Safety
+                    if (current_point-prev_point)>precautionary_slop:
+                        if not initialTO:
+                            initialTO = True
+                            initial_detectedTO_value.append(current_point)
+                            initial_detectedTO_time.append(current_time)
+                        if not TOhappened:
+                            TOhappened = True
+                            final_detectedTO_value.append(current_point)
+                            final_detectedTO_time.append(current_time)
+
+                    #detecteding the first 
+                    elif not initialTO:
+                        initialTO = True
+                        initial_detectedTO_value.append(current_point)
+                        initial_detectedTO_time.append(current_time)
+
+                    #detecting final
+                    elif not TOhappened and initialTO and (current_time-initial_detectedTO_time[-1])>=average_TOdelay:
+                        TOhappened = True
+                        final_detectedTO_value.append(current_point)
+                        final_detectedTO_time.append(current_time)
 
                 else:
                     first_peak = False
@@ -232,10 +298,14 @@ for filename in os.listdir(directory):
         print("POINTS:")
         print("peaks value: ", peaks_value)
         print("peaks time: ", peaks_time)
-        print("detectedTO value: ", detectedTO_value)
-        print("detectedTO time: ", detectedTO_time)
-        print("detectedIC value: ", detectedIC_value)
-        print("detectedIC time: ", detectedIC_time)
+        print("init detectedTO value: ", initial_detectedTO_value)
+        print("init detectedTO time: ", initial_detectedTO_time)
+        print("init detectedIC value: ", initial_detectedIC_value)
+        print("init detectedIC time: ", initial_detectedIC_time)
+        print("final detectedTO value: ", final_detectedTO_value)
+        print("final detectedTO time: ", final_detectedTO_time)
+        print("final detectedIC value: ", final_detectedIC_value)
+        print("final detectedIC time: ", final_detectedIC_time)
         print("shouldveTO value: ", shouldveTO_value)
         print("shouldveTO time: ", shouldveTO_time)
         print("shouldveIC value: ", shouldveIC_value)
@@ -260,26 +330,26 @@ for filename in os.listdir(directory):
             writer = csv.writer(csvfile)
 
             #Creating titles
-            writer.writerow(["Peaks Value","Peaks Time","IC Detected Value","IC Detected Time","TO Detected Value", "TO Detected Time", "Where IC Should've Been Value","Where IC Should've Been Time","Where TO Should've Been Value","Where TO Should've Been Time", "IC Delay", "TO Delay"])
+            writer.writerow(["Peaks Value","Peaks Time","IC Detected Value","IC Detected Time","TO Detected Value", "TO Detected Time", "Where IC Should've Been Value","Where IC Should've Been Time","Where TO Should've Been Value","Where TO Should've Been Time", "IC Delay", "TO Delay", "Inital Detected IC value", "Initial Detected IC time", "Initial Detected TO value", "Initial Detected TO time"])
             
             #Finding the longest list
-            longestTime = [len(peaks_value),len(peaks_time), len(detectedIC_value),len(detectedIC_time), len(detectedTO_value),len(detectedTO_time), len(shouldveIC_value), len(shouldveIC_time),len(shouldveTO_value), len(shouldveTO_time), len(ICdelay), len(TOdelay)]
+            longestTime = [len(peaks_value),len(peaks_time), len(final_detectedIC_value),len(final_detectedIC_time), len(final_detectedTO_value),len(final_detectedTO_time), len(shouldveIC_value), len(shouldveIC_time),len(shouldveTO_value), len(shouldveTO_time), len(ICdelay), len(TOdelay)]
             for i in range(0,max(longestTime)):
                 
                 #Recodring all the values into their own columns
-                printing_list = ["","","","","","","", "", "", "", "", ""]
+                printing_list = ["","","","","","","", "", "", "", "", "","", "", "", ""]
                 if i<len(peaks_value):
                     printing_list[0] = peaks_value[i]
                 if i<len(peaks_time):
                     printing_list[1] = peaks_time[i]
-                if i<len(detectedIC_value):
-                    printing_list[2] = detectedIC_value[i]
-                if i<len(detectedIC_time):
-                    printing_list[3] = detectedIC_time[i]
-                if i <len(detectedTO_value):
-                    printing_list[4] = detectedTO_value[i]
-                if i <len(detectedTO_time):
-                    printing_list[5] = detectedTO_time[i]
+                if i<len(final_detectedIC_value):
+                    printing_list[2] = final_detectedIC_value[i]
+                if i<len(final_detectedIC_time):
+                    printing_list[3] = final_detectedIC_time[i]
+                if i <len(final_detectedTO_value):
+                    printing_list[4] = final_detectedTO_value[i]
+                if i <len(final_detectedTO_time):
+                    printing_list[5] = final_detectedTO_time[i]
                 if i <len(shouldveIC_value):
                     printing_list[6] = shouldveIC_value[i]
                 if i <len(shouldveIC_time):
@@ -292,6 +362,14 @@ for filename in os.listdir(directory):
                     printing_list[10] = ICdelay[i]
                 if i <len(TOdelay):
                     printing_list[11] = TOdelay[i]
+                if i <len(initial_detectedIC_value):
+                    printing_list[12] = initial_detectedIC_value[i]
+                if i <len(initial_detectedIC_time):
+                    printing_list[13] = initial_detectedIC_time[i]
+                if i <len(initial_detectedTO_value):
+                    printing_list[14] = initial_detectedTO_value[i]
+                if i <len(initial_detectedTO_time):
+                    printing_list[15] = initial_detectedTO_time[i]
                 writer.writerow(printing_list)
 
         #break
