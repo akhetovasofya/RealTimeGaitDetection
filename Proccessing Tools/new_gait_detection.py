@@ -29,17 +29,7 @@ def finding_TO(values):
     fall_down_from_peak = False
     TOindex = -1
     TOvalue = 0
-    print("in the TO function")
     for i in range(round(len(values)*0.5)+2, len(values)):
-        print()
-        print("i: ", i)
-        print("time: ", )
-        print("1: ",values[i-1]-values[i-2] , " <0")
-        print("2: ",values[i]-values[i-1], " >0")
-        print("3: ",values[i-1], " and <",  TOvalue)
-        print("4: ",values[i-1] , " <0")
-        print("1: ", values[i], " >0")
-        print("2: ", fall_down_from_peak)
         if values[i-1]-values[i-2]<= 0 and values[i]-values[i-1]>=0 and values[i-1]<TOvalue and values[i-1]<0:
             TOvalue = values[i-1]
             TOindex = i-1
@@ -67,8 +57,8 @@ for filename in os.listdir(directory):
             next(imu)
             
             #Doing only this file
-            #if filename!="GRT01_slow_01.csv":
-            #    continue
+            if filename!="GRT01_slow_01.csv":
+                continue
 
             #Skipping some files
             if name_split[0] == "GRT03":
@@ -104,13 +94,20 @@ for filename in os.listdir(directory):
             #Ratio numbers
             peaks_ratio = 0.7 #for thresholds
             step_time_ratio = 0.6 #to not error out on noise
+            IC_ratio = 0.7
+            TO_ratio = 0.7
+            standing_time_ratio = 0.7
 
             #How many last steps to use
             steps = 3
 
             #A peak threshold to detect the first calibration step
+            #giving initial values mostly for calibration
             average_peak = 100
             average_time = 1000 #in ms
+            average_TO = -1
+            average_IC = -1
+            average_standing_time = 500 #in ms
 
             #setting previous
             prev_point = 0
@@ -124,7 +121,8 @@ for filename in os.listdir(directory):
 
             #State Machine Terms
             first_peak = False
-            
+            IChappened = False  
+            TOhappened = False          
 
             # Iterate through each row of data
             for index, row in enumerate(imu):
@@ -149,20 +147,27 @@ for filename in os.listdir(directory):
                     if len(peaks_value)>=i:
                         average_peak = sum(peaks_value[len(peaks_value)-i:])/i
                         average_time = sum(all_step_time[len(all_step_time)-i:])/i
+                    if len(shouldveIC_value)>=i:
+                        average_IC = sum(shouldveIC_value[len(shouldveIC_value)-i:])/i
+                    if len(shouldveTO_value)>=i:
+                        average_TO = sum(shouldveTO_value[len(shouldveTO_value)-i:])/i
+                    if len(standing_time)>=i:
+                        average_standing_time = sum(standing_time[len(standing_time)-i:])/i
+
 
                 if current_point>average_peak*peaks_ratio:
                     
                     #Incase it is too short due to noise
                     if step_time_ratio*average_time < (current_time-step_time[0]) and not first_peak:
+                        
+                        #Resetting State Machine values
+                        IChappened = False
+                        TOhappened = False
+                        
                         #Recording some values
                         peaks_value.append(max(step_values)) #finding the max
                         peaks_time.append(step_time[step_values.index(max(step_values))]) #finding the index to the max to match it's timing
-                        #print("time step: ", step_time)
-                        #print("time values: ", step_values)
 
-                        #the logic of finding where TO and IC should've been is through getting local minimums and taking the first one for IC and last one for TO
-                        #the logic for first minimum to be IC is because that should be the initial change thus would be the first drastic minimum. After that, there is probably a bit of noise.
-                        #The logic for the last minimum for TO is because once toes are lifted it will become positive so the most reliable minimum is probably going to be the last one
                         local_mins_index = argrelextrema(np.array(step_values), np.less)[0]
                         IC_index = finding_IC(step_values) #function to find the local min of IC
                         TO_index = finding_TO(step_values) #function to find the local min of TO
@@ -170,10 +175,18 @@ for filename in os.listdir(directory):
                         shouldveIC_value.append(step_values[IC_index]) #IC where it should've been
                         shouldveTO_time.append(step_time[TO_index]) #TO where it should've been
                         shouldveIC_time.append(step_time[IC_index]) #IC where it should've been
-                        #TOdelay.append(detectedTO[-1]-shouldveTO[-1])
-                        #ICdelay.append(detectedIC[-1]-shouldveIC[-1])
+
+                        #If TO and IC empty, that means it's their first step so we need to append the first should've value
+                        if not detectedTO_value:
+                            detectedTO_value.append(shouldveTO_value[-1])
+                            detectedTO_time.append(shouldveTO_time[-1])
+                        if not detectedIC_value:
+                            detectedIC_value.append(shouldveIC_value[-1])
+                            detectedIC_time.append(shouldveIC_time[-1])
+                        TOdelay.append(shouldveTO_time[-1]-detectedTO_time[-1])
+                        ICdelay.append(shouldveIC_time[-1]-detectedIC_time[-1])
                         all_step_time.append(step_time[-1]-step_time[0])
-                        #standing_time.append(shouldveIC[-1]-shouldveTO[-1])
+                        standing_time.append(shouldveTO_time[-1] - shouldveIC_time[-1])
 
                         #Clearing the last step
                         step_values.clear()
@@ -181,13 +194,24 @@ for filename in os.listdir(directory):
 
                     #Only do it once
                     first_peak = True
+
+                #checking whether calibrated, whether IC has not happened in the step, and whether this point is bellow our IC threshold
+                elif average_IC!=-1 and not IChappened and current_point < IC_ratio*average_IC:
+                    IChappened = True
+                    detectedIC_value.append(current_point)
+                    detectedIC_time.append(current_time)
+
+                #checking whether calibrated, whether TO has not happend but IC did in the step, and whether the timing bigged than average standing time
+                elif average_TO!=-1 and not TOhappened and IChappened and current_point < TO_ratio*average_TO and (current_time-detectedIC_time[-1])>average_standing_time*standing_time_ratio:
+                    TOhappened = True
+                    detectedTO_value.append(current_point)
+                    detectedTO_time.append(current_time)
+
                 else:
                     first_peak = False
                 
                 step_values.append(current_point)
                 step_time.append(current_time)
-
-
 
                 #Recodring Previous Values
                 second_prev_point = prev_point

@@ -34,8 +34,8 @@ for filename in os.listdir(directory):
             continue
         
         #only analysing some files
-        #if filename!="GRT01_slow_01.csv":
-        #    continue
+        if filename!="GRT01_slow_01.csv":
+            continue
 
         #Flipping values for all the right legs as the imu was flipped
         right_foot = 1
@@ -72,6 +72,16 @@ for filename in os.listdir(directory):
         peaks_time_detected = detected[detected.columns[1]]
         peaks_time_detected = peaks_time_detected.values.tolist()
 
+        #Detected TO and IC
+        IC_value_detected = detected[detected.columns[2]]
+        IC_value_detected = IC_value_detected.values.tolist()
+        IC_time_detected = detected[detected.columns[3]]
+        IC_time_detected = IC_time_detected.values.tolist()
+        TO_value_detected = detected[detected.columns[4]]
+        TO_value_detected = TO_value_detected.values.tolist()
+        TO_time_detected = detected[detected.columns[5]]
+        TO_time_detected = TO_time_detected.values.tolist()
+
         #Should've TO and IC
         shoulve_IC_value_detected = detected[detected.columns[6]]
         shoulve_IC_value_detected = shoulve_IC_value_detected.values.tolist()
@@ -81,12 +91,16 @@ for filename in os.listdir(directory):
         shoulve_TO_value_detected = shoulve_TO_value_detected.values.tolist()
         shoulve_TO_time_detected = detected[detected.columns[9]]
         shoulve_TO_time_detected = shoulve_TO_time_detected.values.tolist()
-        
+
         #deleting unused
         checked_TO_GroundTruth = []
         checked_IC_GroundTruth = []
         checked_peaks_values_detected = []
         checked_peaks_time_detected = []
+        checked_IC_value_detected = []
+        checked_IC_time_detected = []
+        checked_TO_value_detected = []
+        checked_TO_time_detected = []
         checked_shoulve_IC_value_detected = []
         checked_shoulve_IC_time_detected = []
         checked_shoulve_TO_value_detected = []
@@ -109,6 +123,22 @@ for filename in os.listdir(directory):
         for i in range(0, len(peaks_time_detected)):
             if peaks_time_detected[i] == peaks_time_detected[i]:
                 checked_peaks_time_detected.append(peaks_time_detected[i]) # deleting NaNs
+        
+        #checking for detected IC
+        for i in range(0, len(IC_value_detected)):
+            if IC_value_detected[i] == IC_value_detected[i]:
+                checked_IC_value_detected.append(IC_value_detected[i]) # deleting NaNs
+        for i in range(0, len(IC_time_detected)):
+            if IC_time_detected[i] == IC_time_detected[i]:
+                checked_IC_time_detected.append(IC_time_detected[i]) # deleting NaNs
+        
+        #checking for detected TO
+        for i in range(0, len(TO_value_detected)):
+            if TO_value_detected[i] == TO_value_detected[i]:
+                checked_TO_value_detected.append(TO_value_detected[i]) # deleting NaNs
+        for i in range(0, len(TO_time_detected)):
+            if TO_time_detected[i] == TO_time_detected[i]:
+                checked_TO_time_detected.append(TO_time_detected[i]) # deleting NaNs
 
         #checking for should've IC
         for i in range(0, len(shoulve_IC_value_detected)):
@@ -150,6 +180,8 @@ for filename in os.listdir(directory):
         plt.scatter(checked_peaks_time_detected, checked_peaks_values_detected, s=10,label="Peaks", color='green', linewidth=1.0, zorder=1)
         plt.scatter(checked_shoulve_IC_time_detected, checked_shoulve_IC_value_detected, s=10,label="Should've IC", color='red', linewidth=0.7, zorder=1)
         plt.scatter(checked_shoulve_TO_time_detected, checked_shoulve_TO_value_detected, s=10,label="Should've TO", color='blue', linewidth=0.7, zorder=1)
+        plt.scatter(checked_IC_time_detected, checked_IC_value_detected, s=10,label="Detected IC", color='pink', linewidth=0.7, zorder=1)
+        plt.scatter(checked_TO_time_detected, checked_TO_value_detected, s=10,label="Detected TO", color='cyan', linewidth=0.7, zorder=1)
 
 
         # Add labels and legend
