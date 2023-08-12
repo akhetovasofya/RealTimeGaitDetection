@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import csv
 import global_variables
+import statistics
 # Set the directory path to search for .log files
 directory = global_variables.directory
 directory_ground_truth = global_variables.directory_ground_truth
@@ -41,7 +42,6 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
         if filename.endswith(".csv"):
             name = filename.split('_')
             print(filename)
-            print(filename)
             if name[0] == "GRT03":
                 continue
             imu = pd.read_csv(os.path.join(directory, filename))
@@ -49,78 +49,112 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             detected = pd.read_csv(os.path.join(directory_detected, filename.split('.csv')[0]+ "_detected.csv"))
 
         
-            #detected
-            #########   DOTS FOR WHAT IT'S SUPPOSED TO BE  #####################
-            TOs_old = detected[detected.columns[0]]
-            TOs_old = TOs_old.values.tolist()
-            TOg_old = detected[detected.columns[1]]
-            TOg_old = TOg_old.values.tolist()
-            ICs_old = detected[detected.columns[2]]
-            ICs_old = ICs_old.values.tolist()
-            ICg_old = detected[detected.columns[3]]
-            ICg_old = ICg_old.values.tolist()
-            ogTOs_old = detected[detected.columns[4]]
-            ogTOs_old = ogTOs_old.values.tolist()
-            ogTOg_old = detected[detected.columns[5]]
-            ogTOg_old = ogTOg_old.values.tolist()
-            ogICs_old = detected[detected.columns[6]]
-            ogICs_old = ogICs_old.values.tolist()
-            ogICg_old = detected[detected.columns[7]]
-            ogICg_old = ogICg_old.values.tolist()
+            #Values from detected
+            peaks_value = detected[detected.columns[0]]
+            peaks_value = peaks_value.values.tolist()
+            peaks_time = detected[detected.columns[1]]
+            peaks_time = peaks_time.values.tolist()
+            ICdetected_value = detected[detected.columns[2]]
+            ICdetected_value = ICdetected_value.values.tolist()
+            ICdetected_time = detected[detected.columns[3]]
+            ICdetected_time = ICdetected_time.values.tolist()
+            TOdetected_value = detected[detected.columns[4]]
+            TOdetected_value = TOdetected_value.values.tolist()
+            TOdetected_time = detected[detected.columns[5]]
+            TOdetected_time = TOdetected_time.values.tolist()
+            ICshouldve_value = detected[detected.columns[6]]
+            ICshouldve_value = ICshouldve_value.values.tolist()
+            ICshouldve_time = detected[detected.columns[7]]
+            ICshouldve_time = ICshouldve_time.values.tolist()
+            TOshouldve_value = detected[detected.columns[8]]
+            TOshouldve_value = TOshouldve_value.values.tolist()
+            TOshouldve_time = detected[detected.columns[9]]
+            TOshouldve_time = TOshouldve_time.values.tolist()
+            ICdelay = detected[detected.columns[10]]
+            ICdelay = ICdelay.values.tolist()
+            TOdelay = detected[detected.columns[11]]
+            TOdelay = TOdelay.values.tolist()
+            init_ICdetected_value = detected[detected.columns[12]]
+            init_ICdetected_value = init_ICdetected_value.values.tolist()
+            init_ICdetected_time = detected[detected.columns[13]]
+            init_ICdetected_time = init_ICdetected_time.values.tolist()
+            init_TOdetected_value = detected[detected.columns[14]]
+            init_TOdetected_value = init_TOdetected_value.values.tolist()
+            init_TOdetected_time = detected[detected.columns[15]]
+            init_TOdetected_time = init_TOdetected_time.values.tolist()
             
 
-            #Truth
-            TOs = ground_truth[ground_truth.columns[0]]
-            TOs = TOs.values.tolist()
-            ICs = ground_truth[ground_truth.columns[1]]
-            ICs = ICs.values.tolist()
+            #Values from ground truth
+            TOs_truth = ground_truth[ground_truth.columns[0]]
+            TOs_truth = TOs_truth.values.tolist()
+            ICs_truth = ground_truth[ground_truth.columns[1]]
+            ICs_truth = ICs_truth.values.tolist()
             
 
-            ##############################Filtering Nans out of Ground truth
-            TO_time_detected = []
-            IC_time_detected = []
-            for i in range(0, len(TOs_old)):
-                if TOs_old[i] == TOs_old[i]:
-                    TO_time_detected.append(TOs_old[i])
-            for i in range(0, len(ICs_old)):
-                if ICs_old[i] == ICs_old[i]:
-                    IC_time_detected.append(ICs_old[i])
+            #FILTERING OUT NaNs in ground truth
+            checked_TOs_truth = []
+            checked_ICs_truth = []
+            for i in range(0, len(ICs_truth)):
+                if ICs_truth[i] == ICs_truth[i]:
+                    checked_ICs_truth.append(ICs_truth[i])
+            for i in range(0, len(TOs_truth)):
+                if TOs_truth[i] == TOs_truth[i]:
+                    checked_TOs_truth.append(TOs_truth[i])
 
-            IC_time_detected = []
-            IC_value_detected = []
-            TO_time_detected = []
-            TO_value_detected = []
-            actual_IC_time_detected = []
-            actual_IC_value_detected = []
-            actual_TO_time_detected = []
-            actual_TO_value_detected = []
-            for i in range(0, len(TOs_old)):
-                if TOs_old[i] == TOs_old[i]:
-                    TO_time_detected.append(TOs_old[i]) # deleting NaNs
-                    TO_value_detected.append(TOg_old[i]) # deleting NaNs
-            for i in range(0, len(ICs_old)):
-                if ICs_old[i] == ICs_old[i]:
-                    IC_time_detected.append(ICs_old[i]) # deleting NaNs
-                    IC_value_detected.append(ICg_old[i]) # deleting NaNs
+            #FILTERING OUT NaNs in detected
+            checked_peaks_value = []
+            checked_peaks_time = []
+            checked_ICdetected_value = []
+            checked_ICdetected_time = []
+            checked_TOdetected_value = []
+            checked_TOdetected_time = []
+            checked_ICshouldve_value = []
+            checked_ICshouldve_time = []
+            checked_TOshouldve_value = []
+            checked_TOshouldve_time = []
+            checked_ICdelay = []
+            checked_TOdelay = []
+            checked_init_ICdetected_value = []
+            checked_init_ICdetected_time = []
+            checked_init_TOdetected_value = []
+            checked_init_TOdetected_time = []
 
-            for i in range(0, len(ogTOs_old)):
-                if ogTOs_old[i] == ogTOs_old[i]:
-                    actual_TO_time_detected.append(ogTOs_old[i]) # deleting NaNs
-                    actual_TO_value_detected.append(ogTOg_old[i]) # deleting NaNs
-            for i in range(0, len(ogICs_old)):
-                if ogICs_old[i] == ogICs_old[i]:
-                    actual_IC_time_detected.append(ogICs_old[i]) # deleting NaNs
-                    actual_IC_value_detected.append(ogICg_old[i]) # deleting NaNs
+            for i in range(0, len(peaks_time)):
+                if peaks_time[i] == peaks_time[i]:
+                    checked_peaks_time.append(peaks_time[i]) # deleting NaNs
+                    checked_peaks_value.append(peaks_value[i]) # deleting NaNs
+            for i in range(0, len(ICdetected_value)):
+                if ICdetected_value[i] == ICdetected_value[i]:
+                    checked_ICdetected_value.append(ICdetected_value[i]) # deleting NaNs
+                    checked_ICdetected_time.append(ICdetected_time[i]) # deleting NaNs
+            for i in range(0, len(TOdetected_value)):
+                if TOdetected_value[i] == TOdetected_value[i]:
+                    checked_TOdetected_value.append(TOdetected_value[i]) # deleting NaNs
+                    checked_TOdetected_time.append(TOdetected_time[i]) # deleting NaNs
+            for i in range(0, len(ICshouldve_value)):
+                if ICshouldve_value[i] == ICshouldve_value[i]:
+                    checked_ICshouldve_value.append(ICshouldve_value[i]) # deleting NaNs
+                    checked_ICshouldve_time.append(ICshouldve_time[i]) # deleting NaNs
+            for i in range(0, len(TOshouldve_value)):
+                if TOshouldve_value[i] == TOshouldve_value[i]:
+                    checked_TOshouldve_value.append(TOshouldve_value[i]) # deleting NaNs
+                    checked_TOshouldve_time.append(TOshouldve_value[i]) # deleting NaNs
+            for i in range(0, len(ICdelay)):
+                if ICdelay[i] == ICdelay[i]:
+                    checked_ICdelay.append(ICdelay[i]) # deleting NaNs
+            for i in range(0, len(TOdelay)):
+                if TOdelay[i] == TOdelay[i]:
+                    checked_TOdelay.append(TOdelay[i]) # deleting NaNs
+            for i in range(0, len(init_ICdetected_value)):
+                if init_ICdetected_value[i] == init_ICdetected_value[i]:
+                    checked_init_ICdetected_value.append(init_ICdetected_value[i]) # deleting NaNs
+                    checked_init_ICdetected_time.append(init_ICdetected_time[i]) # deleting NaNs
+            for i in range(0, len(init_TOdetected_value)):
+                if init_TOdetected_value[i] == init_TOdetected_value[i]:
+                    checked_init_TOdetected_value.append(init_TOdetected_value[i]) # deleting NaNs
+                    checked_init_TOdetected_time.append(init_TOdetected_time[i]) # deleting NaNs   
             
-            #Getting truth
-            TOs_truth = []
-            ICs_truth = []
-            for i in range(0, len(TOs)):
-                if TOs[i] == TOs[i]:
-                    TOs_truth.append(TOs[i])
-            for i in range(0, len(ICs)):
-                if ICs[i] == ICs[i]:
-                    ICs_truth.append(ICs[i])
+            
 
            #detect error and points missed
             TOerror = []
@@ -130,9 +164,9 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
                 if not if_got_point:
                     TOmisses+=1
                 if_got_point = False
-                for j in range(0,len(TO_time_detected) ):
-                    if abs(TOs_truth[i]-TO_time_detected[j]) < 200:
-                        TOerror.append(TOs_truth[i]-TO_time_detected[j])
+                for j in range(0,len(checked_TOdetected_time) ):
+                    if abs(TOs_truth[i]-checked_TOdetected_time[j]) < 200:
+                        TOerror.append(TOs_truth[i]-checked_TOdetected_time[j])
                         if_got_point = True
             
             ICerror = []
@@ -142,9 +176,9 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
                 if not if_got_point:
                     ICmisses+=1
                 if_got_point = False
-                for j in range(0,len(IC_time_detected) ):
-                    if abs(ICs_truth[i]-IC_time_detected[j]) < 200:
-                        ICerror.append(ICs_truth[i]-IC_time_detected[j])
+                for j in range(0,len(checked_ICdetected_time) ):
+                    if abs(ICs_truth[i]-checked_ICdetected_time[j]) < 200:
+                        ICerror.append(ICs_truth[i]-checked_ICdetected_time[j])
                         if_got_point = True
 
             if len(ICerror)==0 or len(TOerror)==0:
@@ -168,24 +202,39 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
                 overallICvary.append(sum(ICerror)/len(ICerror))
                 overallTOvary.append(sum(TOerror)/len(TOerror))
                 speed = 3
-            writer.writerow([filename, sum(TOerror)/len(TOerror), sum(ICerror)/len(ICerror),TOmisses, ICmisses,(sum(TOs_truth)-sum(actual_TO_time_detected))/len(actual_TO_time_detected), (sum(ICs_truth)-sum(actual_IC_time_detected))/len(actual_IC_time_detected)])
-            writer.writerow(TO_value_detected)
-            writer.writerow(TO_time_detected)
-            writer.writerow(IC_value_detected)
-            writer.writerow(IC_time_detected)
-            writer.writerow(actual_TO_time_detected)
-            writer.writerow(actual_IC_time_detected)
+            writer.writerow([filename, sum(TOerror)/len(TOerror), sum(ICerror)/len(ICerror),TOmisses, ICmisses,(sum(TOs_truth)-sum(checked_TOdetected_value))/len(checked_TOdetected_value), (sum(ICs_truth)-sum(checked_ICdetected_value))/len(checked_ICdetected_value), statistics.mean(checked_TOdelay), statistics.stdev(checked_TOdelay),statistics.mean(checked_ICdelay), statistics.stdev(checked_ICdelay)])
+            writer.writerow(checked_ICdetected_value)
+            writer.writerow(checked_ICdetected_time)
+            writer.writerow(checked_TOdetected_value)
+            writer.writerow(checked_TOdetected_time)
             writer.writerow([])
-            writer.writerow(TOs_truth)
-            writer.writerow(ICs_truth)
+            writer.writerow(checked_TOs_truth)
+            writer.writerow(checked_ICs_truth)
             writer.writerow([])
             writer.writerow([])
-            print("TOs_truth: ", TOs_truth)
-            print("actual_TO_time_detected: ", actual_TO_time_detected)
-            to_plot = np.subtract(TOs_truth, actual_TO_time_detected)
-            ic_plot = np.subtract(ICs_truth, actual_IC_time_detected)
-            axs[0,speed].plot(to_plot, label=name[0])
-            axs[1,speed].plot(ic_plot, label=name[0])
+            TOlen_dif = len(checked_TOshouldve_time)-len(checked_TOs_truth)
+            IClen_dif = len(checked_ICshouldve_time)-len(checked_ICs_truth)
+            print(filename)
+            if TOlen_dif!=0:
+                print("TOs_truth: ", len(np.array(TOs_truth)))
+                print(TOs_truth)
+                print("TOshouldve_time: ", len(np.array(TOshouldve_time)))
+                print(TOshouldve_time)
+                print("checked_TOs_truth: ", len(np.array(checked_TOs_truth)))
+                print("checked_TOshouldve_time: ", len(np.array(checked_TOshouldve_time)))
+                subtractTOdelay = np.subtract(np.array(checked_TOs_truth[:TOlen_dif]), np.array(checked_TOshouldve_time))
+            else:
+                subtractTOdelay = np.subtract(np.array(checked_TOs_truth), np.array(checked_TOshouldve_time))    
+            if IClen_dif!=0:
+                print("ICs_truth: ", len(np.array(ICs_truth)))
+                print("ICshouldve_time: ", len(np.array(ICshouldve_time)))
+                print("checked_ICs_truth: ", len(np.array(checked_ICs_truth)))
+                print("checked_ICshouldve_time: ", len(np.array(checked_ICshouldve_time)))
+                subtractICdelay = np.subtract(np.array(checked_ICs_truth[:IClen_dif]), np.array(checked_ICshouldve_time))
+            else:
+                subtractICdelay = np.subtract(np.array(checked_ICs_truth), np.array(checked_ICshouldve_time))    
+            axs[0,speed].plot(subtractTOdelay, label=name[0])
+            axs[1,speed].plot(subtractICdelay, label=name[0])
 
     writer.writerow(["overallTOslow: ", "overallICslow: ", "overallTOmed: ", "overallICmed: ", "overallTOfast: ", "overallICfast: ", "overallTOvary: ", "overallICvary: "])
     writer.writerow([sum(overallTOslow)/len(overallTOslow), sum(overallICslow)/len(overallICslow),sum(overallTOmed)/len(overallTOmed), sum(overallICmed)/len(overallICmed), sum(overallTOfast)/len(overallTOfast), sum(overallICfast)/len(overallICfast), sum(overallTOvary)/len(overallTOvary), sum(overallICvary)/len(overallICvary) ])
@@ -200,13 +249,12 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
 
     ####################finishing plotting
     plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
-    plt.ylabel("Time Differance (ms)")
-    plt.title("TO Truth Delay")
     plt.show()
 
     ################################################################
     ####################Plotting error##############################
-    
+    axs[0,speed].show()
+
     plt.figure(figsize=(8, 5))
     plt.rcParams.update({'font.size': 20})
     plt.scatter( [0]*len(overallTOslow), overallTOslow, label="Slow",color='green', linewidth=1.0, zorder=1)
