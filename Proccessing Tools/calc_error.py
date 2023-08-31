@@ -13,7 +13,7 @@ directory_final_calculations = global_variables.directory_final_calculations
 
 with open((os.path.join(directory_final_calculations, "Final_Calculations.csv")), "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(["Which file:", "TO average delay", "IC average delay", "TO misses", "IC misses", "TO truth delay", "IC truth delay"])
+    writer.writerow(["Which file:", "TO average delay", "IC average delay", "TO misses", "IC misses", "TO truth delay", "IC truth delay", "Average TO delay", "Standard Deviation TO delay", "Average IC delay", "Standard Deviation IC delay"])
     overallTOslow = []
     overallICslow = []
     overallTOmed = []
@@ -138,7 +138,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             for i in range(0, len(TOshouldve_value)):
                 if TOshouldve_value[i] == TOshouldve_value[i]:
                     checked_TOshouldve_value.append(TOshouldve_value[i]) # deleting NaNs
-                    checked_TOshouldve_time.append(TOshouldve_value[i]) # deleting NaNs
+                    checked_TOshouldve_time.append(TOshouldve_time[i]) # deleting NaNs
             for i in range(0, len(ICdelay)):
                 if ICdelay[i] == ICdelay[i]:
                     checked_ICdelay.append(ICdelay[i]) # deleting NaNs
@@ -158,33 +158,69 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
 
            #detect error and points missed
             TOerror = []
-            TOmisses = 0
-            if_got_point = True
-            for i in range(1, len(TOs_truth)):
-                if not if_got_point:
-                    TOmisses+=1
-                if_got_point = False
-                for j in range(0,len(checked_TOdetected_time) ):
-                    if abs(TOs_truth[i]-checked_TOdetected_time[j]) < 200:
-                        TOerror.append(TOs_truth[i]-checked_TOdetected_time[j])
-                        if_got_point = True
-            
+            TOmisses = len(checked_TOs_truth) - len(checked_TOdetected_time) - 1
             ICerror = []
-            ICmisses = 0
-            if_got_point = True
-            for i in range(1, len(ICs_truth)):
-                if not if_got_point:
-                    ICmisses+=1
-                if_got_point = False
-                for j in range(0,len(checked_ICdetected_time) ):
-                    if abs(ICs_truth[i]-checked_ICdetected_time[j]) < 200:
-                        ICerror.append(ICs_truth[i]-checked_ICdetected_time[j])
-                        if_got_point = True
+            ICmisses = len(checked_ICs_truth) - len(checked_ICdetected_time) - 1
+            TOmisses_check = -1
+            ICmisses_check = -1
+            print("checking length: ", len(checked_TOs_truth) ," , ", len(checked_ICs_truth))
+            print("checking length detected: ", len(checked_TOdetected_time) ," , ", len(checked_ICdetected_time))
+            print("checking misses: ", TOmisses ," , ", ICmisses)
+            #If we missed, we have to skip some points in calculation if delay
+            if TOmisses >= 0:
+                j = 0 #variable to iterate through detected
+                #j is to iterate through detected
+                #Essentially what I want to do here is to iterate through detected and see if the delay is too big, if so this is the one that we missed.
+                #we can use this to cross ref with the TOmisses/ICmisses number
+                for i in range(1, len(checked_TOs_truth)):
+                    #print("i: ", i, " j: ", j)
+                    #print(checked_TOs_truth[i], " ",checked_TOdetected_time[j] )
+                    if abs(checked_TOs_truth[i]-checked_TOdetected_time[j])<300: #this means that it's a hit
+                        TOerror.append(checked_TOs_truth[i]-checked_TOdetected_time[j])
+                        j+=1 #we want to increase j here because we found the hit with checked. If not, we want to stay at the same detected point until we find the next fitting ground truth
+                    TOmisses_check = i-j #to cross referance with TOmisses
 
-            if len(ICerror)==0 or len(TOerror)==0:
+            if ICmisses >= 0:
+                j = 0 #variable to iterate through detected
+                #j is to iterate through detected
+                #Essentially what I want to do here is to iterate through detected and see if the delay is too big, if so this is the one that we missed.
+                #we can use this to cross ref with the TOmisses/ICmisses number
+                for i in range(1, len(checked_ICs_truth)):
+                    if abs(checked_ICs_truth[i]-checked_ICdetected_time[j])<300: #this means that it's a hit
+                        ICerror.append(checked_ICs_truth[i]-checked_ICdetected_time[j])
+                        j+=1 #we want to increase j here because we found the hit with checked. If not, we want to stay at the same detected point until we find the next fitting ground truth
+                    ICmisses_check = i-j # to cross reference with ICmisses
+
+            if TOmisses<0 or ICmisses<0:
+                print()
                 print("Error in file: ", filename)
-                print("Length of IC errors: ", len(ICerror), "; Length of TO errors: ", len(TOerror))
+                print("ERROR: TOmisses or ICmissses is less than 0")
+                print()
                 continue
+
+            #checking if none detected
+            if len(ICerror)==0 or len(TOerror)==0:
+                print()
+                print("Error in file: ", filename, " ICerror OR TOerror is 0!")
+                print("Length of IC errors: ", len(ICerror), "; Length of TO errors: ", len(TOerror))
+                print()
+                continue
+
+            #TO misses mismatch
+            if TOmisses_check != TOmisses:
+                print()
+                print("Error in file: ", filename)
+                print("ERROR: TO MISSES DON'T MATCH!")
+                print("Length: ", TOmisses, " Algo: ", TOmisses_check)
+                print()
+            
+            #IC misses mismatch
+            if ICmisses_check != ICmisses:
+                print()
+                print("Error in file: ", filename)
+                print("ERROR: IC MISSES DON'T MATCH!")
+                print("Length: ", ICmisses, " Algo: ", ICmisses_check)
+                print()
 
             if name[1] == "slow":
                 overallICslow.append(sum(ICerror)/len(ICerror))
@@ -212,27 +248,20 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             writer.writerow(checked_ICs_truth)
             writer.writerow([])
             writer.writerow([])
-            TOlen_dif = len(checked_TOshouldve_time)-len(checked_TOs_truth)
-            IClen_dif = len(checked_ICshouldve_time)-len(checked_ICs_truth)
-            print(filename)
-            if TOlen_dif!=0:
-                print("TOs_truth: ", len(np.array(TOs_truth)))
-                print(TOs_truth)
-                print("TOshouldve_time: ", len(np.array(TOshouldve_time)))
-                print(TOshouldve_time)
-                print("checked_TOs_truth: ", len(np.array(checked_TOs_truth)))
-                print("checked_TOshouldve_time: ", len(np.array(checked_TOshouldve_time)))
-                subtractTOdelay = np.subtract(np.array(checked_TOs_truth[:TOlen_dif]), np.array(checked_TOshouldve_time))
+
+            #to see the delay between truth and where in IMU it should've been.
+            print(checked_TOs_truth)
+            print(checked_TOshouldve_time)
+            if len(checked_TOs_truth)==len(checked_TOshouldve_time):
+                subtractTOdelay = np.subtract(np.array(checked_TOs_truth), np.array(checked_TOshouldve_time))    #keeping the last one incase it gets detected
             else:
-                subtractTOdelay = np.subtract(np.array(checked_TOs_truth), np.array(checked_TOshouldve_time))    
-            if IClen_dif!=0:
-                print("ICs_truth: ", len(np.array(ICs_truth)))
-                print("ICshouldve_time: ", len(np.array(ICshouldve_time)))
-                print("checked_ICs_truth: ", len(np.array(checked_ICs_truth)))
-                print("checked_ICshouldve_time: ", len(np.array(checked_ICshouldve_time)))
-                subtractICdelay = np.subtract(np.array(checked_ICs_truth[:IClen_dif]), np.array(checked_ICshouldve_time))
+                subtractTOdelay = np.subtract(np.array(checked_TOs_truth[0:-1]), np.array(checked_TOshouldve_time))    #skipping the last one because it doesn't get detected
+            
+            if len(checked_ICs_truth)==len(checked_ICshouldve_time):
+                subtractICdelay = np.subtract(np.array(checked_ICs_truth), np.array(checked_ICshouldve_time))    #keeping the last one incase it gets detected
             else:
-                subtractICdelay = np.subtract(np.array(checked_ICs_truth), np.array(checked_ICshouldve_time))    
+                subtractICdelay = np.subtract(np.array(checked_ICs_truth[0:-1]), np.array(checked_ICshouldve_time))    #skipping the last one because it doesn't get detected
+            
             axs[0,speed].plot(subtractTOdelay, label=name[0])
             axs[1,speed].plot(subtractICdelay, label=name[0])
 
@@ -253,7 +282,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
 
     ################################################################
     ####################Plotting error##############################
-    axs[0,speed].show()
+    
 
     plt.figure(figsize=(8, 5))
     plt.rcParams.update({'font.size': 20})
