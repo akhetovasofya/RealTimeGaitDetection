@@ -42,7 +42,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
         if filename.endswith(".csv"):
             name = filename.split('_')
             print(filename)
-            if name[0] == "GRT03":
+            if name[0] == "GRT03" or (name[0] == "GRT08" and name[1] == "vary") :
                 continue
             imu = pd.read_csv(os.path.join(directory, filename))
             ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
@@ -238,20 +238,11 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
                 overallICvary.append(sum(ICerror)/len(ICerror))
                 overallTOvary.append(sum(TOerror)/len(TOerror))
                 speed = 3
-            writer.writerow([filename, sum(TOerror)/len(TOerror), sum(ICerror)/len(ICerror),TOmisses, ICmisses,(sum(TOs_truth)-sum(checked_TOdetected_value))/len(checked_TOdetected_value), (sum(ICs_truth)-sum(checked_ICdetected_value))/len(checked_ICdetected_value), statistics.mean(checked_TOdelay), statistics.stdev(checked_TOdelay),statistics.mean(checked_ICdelay), statistics.stdev(checked_ICdelay)])
-            writer.writerow(checked_ICdetected_value)
-            writer.writerow(checked_ICdetected_time)
-            writer.writerow(checked_TOdetected_value)
-            writer.writerow(checked_TOdetected_time)
-            writer.writerow([])
-            writer.writerow(checked_TOs_truth)
-            writer.writerow(checked_ICs_truth)
-            writer.writerow([])
-            writer.writerow([])
+
+
+
 
             #to see the delay between truth and where in IMU it should've been.
-            print(checked_TOs_truth)
-            print(checked_TOshouldve_time)
             if len(checked_TOs_truth)==len(checked_TOshouldve_time):
                 subtractTOdelay = np.subtract(np.array(checked_TOs_truth), np.array(checked_TOshouldve_time))    #keeping the last one incase it gets detected
             else:
@@ -264,6 +255,26 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             
             axs[0,speed].plot(subtractTOdelay, label=name[0])
             axs[1,speed].plot(subtractICdelay, label=name[0])
+
+
+            writer.writerow([filename, sum(TOerror)/len(TOerror), sum(ICerror)/len(ICerror),TOmisses, ICmisses,sum(subtractTOdelay)/len(subtractTOdelay), sum(subtractICdelay)/len(subtractICdelay), statistics.mean(checked_TOdelay), statistics.stdev(checked_TOdelay),statistics.mean(checked_ICdelay), statistics.stdev(checked_ICdelay)])
+            writer.writerow(checked_ICdetected_value)
+            writer.writerow(checked_ICdetected_time)
+            writer.writerow(checked_TOdetected_value)
+            writer.writerow(checked_TOdetected_time)
+            writer.writerow([])
+            writer.writerow(checked_TOshouldve_time)
+            writer.writerow(checked_ICshouldve_time)
+            writer.writerow([])
+            writer.writerow(checked_TOs_truth)
+            writer.writerow(checked_ICs_truth)
+            writer.writerow([])
+            writer.writerow(subtractTOdelay)
+            writer.writerow(subtractICdelay)
+            writer.writerow([])
+            writer.writerow([])
+
+            
 
     writer.writerow(["overallTOslow: ", "overallICslow: ", "overallTOmed: ", "overallICmed: ", "overallTOfast: ", "overallICfast: ", "overallTOvary: ", "overallICvary: "])
     writer.writerow([sum(overallTOslow)/len(overallTOslow), sum(overallICslow)/len(overallICslow),sum(overallTOmed)/len(overallTOmed), sum(overallICmed)/len(overallICmed), sum(overallTOfast)/len(overallTOfast), sum(overallICfast)/len(overallICfast), sum(overallTOvary)/len(overallTOvary), sum(overallICvary)/len(overallICvary) ])

@@ -61,11 +61,11 @@ for filename in os.listdir(directory):
             next(imu)
             
             #Doing only this file
-            #if filename!="GRT01_slow_01.csv":
-            #    continue
+            if filename!="GRT04_slow_31.csv":
+                continue
 
             #Skipping some files
-            if name_split[0] == "GRT03":
+            if name_split[0] == "GRT03" or (name[0] == "GRT08" and name[1] == "vary"):
                 continue
 
             #The imu was flipped for the right foot, so we flip it in post processing

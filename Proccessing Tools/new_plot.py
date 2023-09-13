@@ -30,7 +30,7 @@ for filename in os.listdir(directory):
             name[1] = "Varying Speeds"
 
         #skipping some files
-        if name[0] == "GRT03" :
+        if name[0] == "GRT03" or (name[0] == "GRT08" and name[1] == "vary") :
             continue
         
         #only analysing some files
