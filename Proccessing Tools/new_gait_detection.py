@@ -12,12 +12,16 @@ import global_variables
 #It does it through the logic of first detecting a significant negative slope. When we have that, we know that we are "falling" from the peak.
 #Then the first moment we stop falling and are in the negatives, we reached the "stoppped falling".
 def finding_IC(values):
+    was_positive = False
     falling = False #Whether we started to fall
-    for i in range(2, len(values)):
-        if values[i]-values[i-1]<-10:
+    for i in range(3, len(values)):
+        #values[i-1]-values[i-2]>0 is when I expect the turn from neg to pos but I want to make sure that the slopes before is neg enough, and slope after is pos enough
+        if values[i]-values[i-1]>3 and values[i-1]-values[i-2]>0 and values[i-2]-values[i-3]<0 and values[i]<0 and values[i-1]<0 and values[i-2]<0 and values[i-3]<0 and falling and was_positive:
+            return i-2
+        if values[i]-values[i-1]<-5:
             falling = True
-        if values[i]-values[i-1]>0 and values[i-1]-values[i-2]<0 and values[i]<0 and values[i-1]<0 and values[i-2]<0 and falling:
-            return i-1
+        if values[i]>5:
+            was_positive = True
     print("Error: Couldn't find should've IC")
     return -1
 
@@ -61,8 +65,8 @@ for filename in os.listdir(directory):
             next(imu)
             
             #Doing only this file
-            if filename!="GRT04_slow_31.csv":
-                continue
+           # if filename!="GRT04_slow_31.csv":
+                #continue
 
             #Skipping some files
             if name_split[0] == "GRT03" or (name[0] == "GRT08" and name[1] == "vary"):
