@@ -253,8 +253,10 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             else:
                 subtractICdelay = np.subtract(np.array(checked_ICs_truth[0:-1]), np.array(checked_ICshouldve_time))    #skipping the last one because it doesn't get detected
             
-            axs[0,speed].plot(subtractTOdelay, label=name[0])
-            axs[1,speed].plot(subtractICdelay, label=name[0])
+            axs[0,speed].scatter(range(len(subtractTOdelay)), subtractTOdelay, label=name[0], s=6)
+            axs[1,speed].scatter(range(len(subtractICdelay)), subtractICdelay, label=name[0], s=6)
+            #axs[0,speed].ylabel("ms")
+            #axs[1,speed].ylabel("ms")
 
 
             writer.writerow([filename, sum(TOerror)/len(TOerror), sum(ICerror)/len(ICerror),TOmisses, ICmisses,sum(subtractTOdelay)/len(subtractTOdelay), sum(subtractICdelay)/len(subtractICdelay), statistics.mean(checked_TOdelay), statistics.stdev(checked_TOdelay),statistics.mean(checked_ICdelay), statistics.stdev(checked_ICdelay)])

@@ -34,8 +34,8 @@ for filename in os.listdir(directory):
             continue
         
         #only analysing some files
-        if filename!="GRT07_fast_01.csv":
-            continue
+        #if filename!="GRT02_med_01.csv":
+            #continue
 
         #Flipping values for all the right legs as the imu was flipped
         right_foot = 1
@@ -193,8 +193,8 @@ for filename in os.listdir(directory):
             continue
         
         #Ground Truth Plotting
-        IC_GroundTruth_plotting = [0]*len(checked_IC_GroundTruth)
-        TO_GroundTruth_plotting = [0]*len(checked_TO_GroundTruth)
+        IC_GroundTruth_plotting = [10]*len(checked_IC_GroundTruth)
+        TO_GroundTruth_plotting = [10]*len(checked_TO_GroundTruth)
         #TO
         plt.scatter(checked_TO_GroundTruth, TO_GroundTruth_plotting, marker='o',s=10, label="TO from FSR", facecolors='none', edgecolors='purple', linewidth=1.0, zorder=1)
         #IC

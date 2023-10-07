@@ -253,6 +253,7 @@ for filename in os.listdir(directory):
                 #Left portion is checking whether calibrated, whether TO has not happend but IC did in the step, and whether the timing bigged than average standing time
                 # Right is a TO precaution that if the slope is very large, we call the event
                 elif not TOhappened and IChappened and (current_time-initial_detectedIC_time[-1])>average_standing_time*standing_time_ratio and average_TO!=-1 and ((current_point < TO_ratio*average_TO) or ((current_point-prev_point)>precautionary_slop and current_point<0)):
+                    #take out last cur<0 TODO
                     
                     #Safety
                     if (current_point-prev_point)>precautionary_slop:

@@ -42,7 +42,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
             name = filename.split('_')
             print(filename)
             print(filename)
-            if name[0] == "GRT03":
+            if name[0] == "GRT03"or (name[0] == "GRT08" and name[1] == "vary"):
                 continue
             imu = pd.read_csv(os.path.join(directory, filename))
             ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
