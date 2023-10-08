@@ -166,6 +166,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
                 speed = 2
             elif name[1] == "vary":
                 overallICvary.append(sum(ICerror)/len(ICerror))
+                print("VARY")
                 overallTOvary.append(sum(TOerror)/len(TOerror))
                 speed = 3
             writer.writerow([filename, sum(TOerror)/len(TOerror), sum(ICerror)/len(ICerror),TOmisses, ICmisses,(sum(TOs_truth)-sum(actual_TO_time_detected))/len(actual_TO_time_detected), (sum(ICs_truth)-sum(actual_IC_time_detected))/len(actual_IC_time_detected)])

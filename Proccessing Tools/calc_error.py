@@ -42,7 +42,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
         if filename.endswith(".csv"):
             name = filename.split('_')
             print(filename)
-            if name[0] == "GRT03" or (name[0] == "GRT08" and name[1] == "vary") :
+            if name[0] == "GRT03" or name[0] == "GRT08"  :
                 continue
             imu = pd.read_csv(os.path.join(directory, filename))
             ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
@@ -173,8 +173,6 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
                 #Essentially what I want to do here is to iterate through detected and see if the delay is too big, if so this is the one that we missed.
                 #we can use this to cross ref with the TOmisses/ICmisses number
                 for i in range(1, len(checked_TOs_truth)):
-                    #print("i: ", i, " j: ", j)
-                    #print(checked_TOs_truth[i], " ",checked_TOdetected_time[j] )
                     if abs(checked_TOs_truth[i]-checked_TOdetected_time[j])<300: #this means that it's a hit
                         TOerror.append(checked_TOs_truth[i]-checked_TOdetected_time[j])
                         j+=1 #we want to increase j here because we found the hit with checked. If not, we want to stay at the same detected point until we find the next fitting ground truth
@@ -212,6 +210,7 @@ with open((os.path.join(directory_final_calculations, "Final_Calculations.csv"))
                 print("Error in file: ", filename)
                 print("ERROR: TO MISSES DON'T MATCH!")
                 print("Length: ", TOmisses, " Algo: ", TOmisses_check)
+                print()
                 print()
             
             #IC misses mismatch

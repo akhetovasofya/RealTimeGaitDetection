@@ -69,7 +69,7 @@ for filename in os.listdir(directory):
                 #continue
 
             #Skipping some files
-            if name_split[0] == "GRT03" or (name[0] == "GRT08" and name[1] == "vary"):
+            if name_split[0] == "GRT03" or name[0] == "GRT08":
                 continue
 
             #The imu was flipped for the right foot, so we flip it in post processing
