@@ -16,11 +16,12 @@ def finding_IC(values):
     falling = False #Whether we started to fall
     for i in range(3, len(values)):
         #values[i-1]-values[i-2]>0 is when I expect the turn from neg to pos but I want to make sure that the slopes before is neg enough, and slope after is pos enough
-        if values[i]-values[i-1]>3 and values[i-1]-values[i-2]>0 and values[i-2]-values[i-3]<0 and values[i]<0 and values[i-1]<0 and values[i-2]<0 and values[i-3]<0 and falling and was_positive:
+        #current point is i-2
+        if values[i]-values[i-1]>0 and values[i-1]-values[i-2]>0 and values[i-2]-values[i-3]<0 and values[i-1]<0 and values[i-2]<0 and values[i-3]<0 and falling and was_positive:
             return i-2
         if values[i]-values[i-1]<-5:
             falling = True
-        if values[i]>5:
+        if values[i]>0:
             was_positive = True
     print("Error: Couldn't find should've IC")
     return -1
@@ -33,6 +34,7 @@ def finding_TO(values):
     TOindex = -1
     TOvalue = 0
     for i in range(round(len(values)*0.5)+2, len(values)):
+        #current point is i-1
         if values[i-1]-values[i-2]<= 0 and values[i]-values[i-1]>=0 and values[i-1]<TOvalue and values[i-1]<0:
             TOvalue = values[i-1]
             TOindex = i-1
@@ -98,8 +100,8 @@ for filename in os.listdir(directory):
             final_detectedIC_time = [] #IC that algo detected
             shouldveTO_time = [] #TO where it should've been
             shouldveIC_time = [] #IC where it should've been
-            TOdelay = [] #delay of TO (detectedTO-shouldveTO)
-            ICdelay = [] #delay of IC (detectedIC-shouldveIC)
+            TOdelay = [] #delay of TO (detectedTO-shouldveTO) but only positive
+            ICdelay = [] #delay of IC (detectedIC-shouldveIC) but only positive
             all_step_time = [] #Records how long each step is
             standing_time = [] #Records how long standing time is (shouldveTO-shouldveIC)
 
@@ -111,8 +113,8 @@ for filename in os.listdir(directory):
             standing_time_ratio = 0.7
             precautionary_slop = 10
 
-            #How many last steps to use
-            steps = 3
+            #How many last strides to use
+            strides = 3
 
             #A peak threshold to detect the first calibration step
             #giving initial values mostly for calibration
@@ -158,9 +160,9 @@ for filename in os.listdir(directory):
 ####################################################################################
 
                 #Seeing if current_point is bigger then peaks
-                #We do a range of steps because if takes time to get to step amount
+                #We do a range of strides because if takes time to get to step amount
                 #This will get the rolling average of the last 3 items or less if there are no 3 items
-                for i in range(1,steps):
+                for i in range(1,strides):
                     if len(peaks_value)>=i:
                         average_peak = sum(peaks_value[len(peaks_value)-i:])/i
                         average_time = sum(all_step_time[len(all_step_time)-i:])/i
@@ -208,7 +210,7 @@ for filename in os.listdir(directory):
                             initial_detectedIC_time.append(shouldveIC_time[-1])
 
                         #I only want to append if the delay is positive as that means detected happened before should've which means I can delay the event
-                        #If it's negetive, it means that detected happened after should've thus I can't delay.
+                        #If it's negetive, it means that detected happened after should've thus I can't delay. If it's zero than it hit the safety.
                         if shouldveTO_time[-1]-initial_detectedTO_time[-1] > 0:
                             TOdelay.append(shouldveTO_time[-1]-initial_detectedTO_time[-1])
                         if shouldveIC_time[-1]-initial_detectedIC_time[-1] > 0:
@@ -335,14 +337,14 @@ for filename in os.listdir(directory):
             writer = csv.writer(csvfile)
 
             #Creating titles
-            writer.writerow(["Peaks Value","Peaks Time","IC Detected Value","IC Detected Time","TO Detected Value", "TO Detected Time", "Where IC Should've Been Value","Where IC Should've Been Time","Where TO Should've Been Value","Where TO Should've Been Time", "IC Delay", "TO Delay", "Inital Detected IC value", "Initial Detected IC time", "Initial Detected TO value", "Initial Detected TO time"])
+            writer.writerow(["Peaks Value","Peaks Time","IC Detected Value","IC Detected Time","TO Detected Value", "TO Detected Time", "Where IC Should've Been Value","Where IC Should've Been Time","Where TO Should've Been Value","Where TO Should've Been Time", "IC Delay", "TO Delay", "Inital Detected IC value", "Initial Detected IC time", "Initial Detected TO value", "Initial Detected TO time", "Stance Time"])
             
             #Finding the longest list
-            longestTime = [len(peaks_value),len(peaks_time), len(final_detectedIC_value),len(final_detectedIC_time), len(final_detectedTO_value),len(final_detectedTO_time), len(shouldveIC_value), len(shouldveIC_time),len(shouldveTO_value), len(shouldveTO_time), len(ICdelay), len(TOdelay)]
+            longestTime = [len(initial_detectedTO_time),len(initial_detectedIC_time),len(peaks_value),len(peaks_time), len(final_detectedIC_value),len(final_detectedIC_time), len(final_detectedTO_value),len(final_detectedTO_time), len(shouldveIC_value), len(shouldveIC_time),len(shouldveTO_value), len(shouldveTO_time), len(ICdelay), len(TOdelay), len(standing_time)]
             for i in range(0,max(longestTime)):
                 
                 #Recodring all the values into their own columns
-                printing_list = ["","","","","","","", "", "", "", "", "","", "", "", ""]
+                printing_list = ["","","","","","","", "", "", "", "", "","", "", "", "", ""]
                 if i<len(peaks_value):
                     printing_list[0] = peaks_value[i]
                 if i<len(peaks_time):
@@ -375,6 +377,8 @@ for filename in os.listdir(directory):
                     printing_list[14] = initial_detectedTO_value[i]
                 if i <len(initial_detectedTO_time):
                     printing_list[15] = initial_detectedTO_time[i]
+                if i<len(standing_time):
+                    printing_list[16] = standing_time[i]
                 writer.writerow(printing_list)
 
         #break

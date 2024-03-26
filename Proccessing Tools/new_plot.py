@@ -34,8 +34,8 @@ for filename in os.listdir(directory):
             continue
         
         #only analysing some files
-        if name[0] != "GRT10":
-            continue
+        #if name[0] != "GRT10":
+        #    continue
 
         #Flipping values for all the right legs as the imu was flipped
         right_foot = 1
@@ -51,9 +51,11 @@ for filename in os.listdir(directory):
         
         #Reading and plotting the imu and FSR data
         imu = pd.read_csv(os.path.join(directory, filename))
-        plt.plot(imu[imu.columns[9]], imu[imu.columns[6]]*right_foot, label="Angular Velocity\n in Z (deg/s)", linewidth=1.0, zorder=-1)
-        plt.plot(imu[imu.columns[9]], imu[imu.columns[7]], label="FSR Toe", linewidth=1.0, zorder=-1)
-        plt.plot(imu[imu.columns[9]], imu[imu.columns[8]], label="FSR Heel", linewidth=1.0, zorder=-1)
+        fig, ax1 = plt.subplots() 
+        ax1.plot(imu[imu.columns[9]], imu[imu.columns[6]]*right_foot, label="Angular Velocity\n in Z (deg/s)", linewidth=1.0, zorder=-1)
+        ax2 = ax1.twinx() 
+        ax2.plot(imu[imu.columns[9]], imu[imu.columns[7]]*3.3/1024, label="FSR Toe (V)", color='green', linewidth=1.0, zorder=-1)
+        ax2.plot(imu[imu.columns[9]], imu[imu.columns[8]]*3.3/1024, label="FSR Heel (V)",color='orange',  linewidth=1.0, zorder=-1)
 
         #Plotting the Ground Truth points
         ground_truth = pd.read_csv(os.path.join(directory_ground_truth, filename.split('.csv')[0]+ "_ground_truth.csv"))
@@ -193,27 +195,32 @@ for filename in os.listdir(directory):
             continue
         
         #Ground Truth Plotting
-        IC_GroundTruth_plotting = [10]*len(checked_IC_GroundTruth)
-        TO_GroundTruth_plotting = [10]*len(checked_TO_GroundTruth)
+        IC_GroundTruth_plotting = [10*3.3/1023]*len(checked_IC_GroundTruth)
+        TO_GroundTruth_plotting = [10*3.3/1023]*len(checked_TO_GroundTruth)
         #TO
-        plt.scatter(checked_TO_GroundTruth, TO_GroundTruth_plotting, marker='o',s=10, label="TO from FSR", facecolors='none', edgecolors='purple', linewidth=1.0, zorder=1)
+        ax2.scatter(checked_TO_GroundTruth, TO_GroundTruth_plotting, marker='o',s=20, label="FSR TO", facecolors='none', edgecolors='purple', linewidth=2.0, zorder=1)
         #IC
-        plt.scatter(checked_IC_GroundTruth, IC_GroundTruth_plotting, marker='o',s=10, label="IC from FSR", facecolors='none', edgecolors='red',linewidth=1.0, zorder=1)
+        ax2.scatter(checked_IC_GroundTruth, IC_GroundTruth_plotting, marker='o',s=20, label="FSR IC", facecolors='none', edgecolors='red',linewidth=2.0, zorder=1)
         
         #Detected
-        plt.scatter(checked_peaks_time_detected, checked_peaks_values_detected, s=10,label="Peaks", color='green', linewidth=1.0, zorder=1)
-        plt.scatter(checked_shoulve_IC_time_detected, checked_shoulve_IC_value_detected, s=10,label="Should've IC", color='red', linewidth=0.7, zorder=1)
-        plt.scatter(checked_shoulve_TO_time_detected, checked_shoulve_TO_value_detected, s=10,label="Should've TO", color='blue', linewidth=0.7, zorder=1)
-        plt.scatter(checked_IC_time_detected, checked_IC_value_detected, s=10,label="Detected IC", color='pink', linewidth=0.7, zorder=1)
-        plt.scatter(checked_TO_time_detected, checked_TO_value_detected, s=10,label="DetectedTO", color='cyan', linewidth=0.7, zorder=1)
-        plt.scatter(checked_init_IC_time_detected, checked_init_IC_value_detected, facecolors='none',s=10,label="Intially Detected IC", color='pink', linewidth=0.7, zorder=1)
-        plt.scatter(checked_init_TO_time_detected, checked_init_TO_value_detected, facecolors='none',s=10,label="Intially Detected TO", color='cyan', linewidth=0.7, zorder=1)
+        ax1.scatter(checked_peaks_time_detected, checked_peaks_values_detected, facecolors='none', s=10, label="Threshold Mid-Swing", color='green', linewidth=1.5, zorder=1)
+        ax1.scatter(checked_peaks_time_detected, checked_peaks_values_detected, s=10,label="Mid-Swing", color='green', linewidth=3, zorder=1)
+        ax1.scatter(checked_shoulve_IC_time_detected, checked_shoulve_IC_value_detected, s=10,label="Ideal IC", color='red', linewidth=3, zorder=1)
+        ax1.scatter(checked_shoulve_TO_time_detected, checked_shoulve_TO_value_detected, s=10,label="Ideal TO", color='blue', linewidth=3, zorder=1)
+        ax1.scatter(checked_IC_time_detected, checked_IC_value_detected, s=10,label="Predicted IC", color='pink', linewidth=3, zorder=1)
+        ax1.scatter(checked_TO_time_detected, checked_TO_value_detected, s=10,label="Predicted TO", color='cyan', linewidth=3, zorder=1)
+        ax1.scatter(checked_init_IC_time_detected, checked_init_IC_value_detected, facecolors='none',s=15,label="Threshold IC", color='pink', linewidth=1.5, zorder=1)
+        ax1.scatter(checked_init_TO_time_detected, checked_init_TO_value_detected, facecolors='none',s=15,label="Threshold TO", color='cyan', linewidth=1.5, zorder=1)
 
 
         # Add labels and legend
-        plt.xlabel("Time (ms)")
+        ax2.set_ylabel("Measured Voltage (V)")
+        ax2.set_ylim([-1, 1])
+        ax1.set_xlabel("Time (ms)")
+        ax1.set_ylabel("Angular Velocity (degrees/s)")
         plt.title(pretty_name)
-        plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+        #plt.title("Imu Signal")
+        #plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
 
         
         # Show the plot
