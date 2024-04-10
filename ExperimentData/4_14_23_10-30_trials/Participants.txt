@@ -1,0 +1,5 @@
+GRT10: left foot, 5'6ft 135lb;
+GRT09: right foot, 5'8ft 175lb flat footed;
+GRT08: left foot, 6'0ft 165lb flat footed; 
+GRT07: right foot, 5'9ft 140lb;
+GRT04: left foot, 6'0ft 155lb; (burned board) new board for 2
